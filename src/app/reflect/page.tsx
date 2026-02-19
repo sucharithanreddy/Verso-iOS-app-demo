@@ -256,6 +256,16 @@ export default function ReflectPage() {
         .filter((m) => m.role === 'assistant')
         .map((m) => (m.reframe || '').trim())
         .filter(Boolean) as string[];
+      
+      const previousAcknowledgments = nextMessages
+        .filter((m) => m.role === 'assistant')
+        .map((m) => (m.content || '').trim())
+        .filter(Boolean) as string[];
+      
+      const previousEncouragements = nextMessages
+        .filter((m) => m.role === 'assistant')
+        .map((m) => (m.encouragement || '').trim())
+        .filter(Boolean) as string[];
 
       const originalTrigger = nextMessages.find((m) => m.role === 'user')?.content || '';
 
@@ -264,6 +274,8 @@ export default function ReflectPage() {
         previousDistortions,
         previousQuestions,
         previousReframes,
+        previousAcknowledgments,
+        previousEncouragements,
         originalTrigger,
         sessionCount: sessions.length + 1,
         groundingMode,
@@ -489,6 +501,17 @@ export default function ReflectPage() {
         .filter((m) => m.role === 'assistant')
         .map((m) => (m.reframe || '').trim())
         .filter(Boolean) as string[];
+      
+      const previousAcknowledgments = messagesAfterEdit
+          .filter((m) => m.role === 'assistant')
+          .map((m) => (m.content || '').trim())
+          .filter(Boolean) as string[];
+
+      const previousEncouragements = messagesAfterEdit
+          .filter((m) => m.role === 'assistant')
+          .map((m) => (m.encouragement || '').trim())
+          .filter(Boolean) as string[];
+
 
       const originalTrigger = messagesAfterEdit.find((m) => m.role === 'user')?.content || '';
 
@@ -497,6 +520,8 @@ export default function ReflectPage() {
         previousDistortions,
         previousQuestions,
         previousReframes,
+        previousAcknowledgments,
+        previousEncouragements,
         originalTrigger,
         sessionCount: sessions.length + 1,
         groundingMode,

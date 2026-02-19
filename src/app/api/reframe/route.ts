@@ -75,6 +75,98 @@ function isDuplicatePatternNote(note: string, previousNotes: string[]): boolean 
 }
 
 // ============================================================================
+// Near-duplicate detection (Jaccard overlap) + generic detection
+// ============================================================================
+
+function tokenize(s: string): string[] {
+  return (s || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s']/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(' ')
+    .filter(Boolean);
+}
+
+function jaccardSimilarity(a: string, b: string): number {
+  const A = new Set(tokenize(a));
+  const B = new Set(tokenize(b));
+  if (A.size === 0 || B.size === 0) return 0;
+  let inter = 0;
+  for (const w of A) if (B.has(w)) inter++;
+  const union = A.size + B.size - inter;
+  return union === 0 ? 0 : inter / union;
+}
+
+function isNearDuplicateQuestion(q: string, previous: string[], threshold = 0.62): boolean {
+  const cur = normalizeForCompare(q);
+  return previous.some(p => jaccardSimilarity(cur, normalizeForCompare(p)) >= threshold);
+}
+
+function isGenericLine(s: string): boolean {
+  const t = normalizeForCompare(s);
+  if (!t) return true;
+
+  // “Poster lines” + repeated vibe-lines seen in your logs
+  const generic = [
+    "you're not alone",
+    "you are not alone",
+    'storm inside',
+    'weather this storm',
+    "it’s okay to feel this way",
+    "it's okay to feel this way",
+    "i hear you",
+    'that sounds',
+    'it seems like',
+    "i understand",
+    'must be hard',
+    'take a step back',
+    'prioritize your well-being',
+    'you’ve got this',
+    "you've got this",
+    "one step at a time",
+    'you’re engaging with this',
+    "you're engaging with this",
+    'that takes real effort',
+    'just talking about it is a step',
+    'it matters that you’re showing up',
+    "it matters that you're showing up",
+    'let’s slow it down',
+    "let's slow it down",
+    'pressure makes everything feel final',
+    'the feeling is real',
+    'not a verdict',
+    "i'm with you",
+    'that makes sense',
+  ];
+
+  if (t.length < 12) return true;
+  return generic.some(g => t.includes(g));
+}
+
+function isGenericQuestion(q: string): boolean {
+  const s = (q || '').toLowerCase().trim();
+  if (!s) return true;
+
+  const banned = [
+    "what's the hardest part",
+    'what’s the hardest part',
+    'what feels heaviest',
+    'what part of this feels most personal',
+    "what's the story your mind keeps replaying",
+    'what’s the story your mind keeps replaying',
+    'tell me more',
+    'explore more deeply',
+    'what would it look like',
+    'what would it feel like',
+    'how does that feel in your body',
+    'where do you feel it',
+  ];
+
+  return banned.some(b => s.includes(b));
+}
+
+// ============================================================================
 // Intent Router (Reflect-only)
 // ============================================================================
 
@@ -148,7 +240,6 @@ function adjustDistortionForIdentityStatement(
   if (identityPatterns.some(p => p.test(userText)) && effectiveLayer !== 'CORE_WOUND') {
     return 'Labeling';
   }
-
   return thoughtPattern;
 }
 
@@ -213,14 +304,8 @@ function isInGroundingMode(
   const wasInGroundingMode = sessionContext?.groundingMode ?? false;
   const previousTurns = sessionContext?.groundingTurns ?? 0;
 
-  if (justChoseGrounding) {
-    return { groundingMode: true, groundingTurns: 1 };
-  }
-
-  if (wasInGroundingMode && previousTurns < 3) {
-    return { groundingMode: true, groundingTurns: previousTurns + 1 };
-  }
-
+  if (justChoseGrounding) return { groundingMode: true, groundingTurns: 1 };
+  if (wasInGroundingMode && previousTurns < 3) return { groundingMode: true, groundingTurns: previousTurns + 1 };
   return { groundingMode: false, groundingTurns: 0 };
 }
 
@@ -549,15 +634,15 @@ function buildResponsePrompt(
   intent: UserIntent = 'AUTO'
 ): string {
   const questionsWarning = previousQuestions.length > 0
-    ? `\n\n⚠️ QUESTIONS YOU'VE ALREADY ASKED - NEVER REPEAT OR PARAPHRASE:\n${previousQuestions
-        .slice(0, 10)
+    ? `\n\n⚠️ QUESTIONS YOU'VE ALREADY ASKED - NEVER REPEAT OR LIGHTLY PARAPHRASE:\n${previousQuestions
+        .slice(0, 12)
         .map(q => `- "${q}"`)
         .join('\n')}`
     : '';
 
   const reframesWarning = previousReframes.length > 0
-    ? `\n\n⚠️ REFRAMES YOU'VE ALREADY USED - NEVER REPEAT OR PARAPHRASE:\n${previousReframes
-        .slice(0, 8)
+    ? `\n\n⚠️ REFRAMES YOU'VE ALREADY USED - NEVER REPEAT OR LIGHTLY PARAPHRASE:\n${previousReframes
+        .slice(0, 10)
         .map(r => `- "${r}"`)
         .join('\n')}`
     : '';
@@ -577,14 +662,19 @@ Return ONLY valid JSON:
   "thoughtPattern": "",
   "patternNote": "",
   "reframe": "Gentle, practical. Present-moment. Sensory if helpful.",
-  "question": "Optional simple present-moment question, or empty string.",
-  "encouragement": "Optional, natural (no motivational poster lines)."
+  "questions": [],
+  "encouragement": ""
 }
+
+QUESTION RULES:
+- If you include questions at all, include at most ONE and make it very present-moment, practical, and not generic.
+- It is totally okay to return an empty array [].
 
 STYLE RULES:
 - NO distortion labels
 - NO deep probing
-- Keep it human and specific, not templated.`;
+- Keep it human and specific, not templated.
+- Avoid motivational poster lines.`;
   }
 
   const effectiveLayer: EffectiveLayer = userRevealedCoreBelief
@@ -602,22 +692,22 @@ STYLE RULES:
     layerGuidance = `📍 CURRENT LAYER: SURFACE
 - Be curious, not clinical.
 - Track what happened + what it means.
-- At most ONE question, and only if it helps.`;
+- Questions are optional; include only if it helps direction.`;
   } else if (effectiveLayer === 'TRANSITION') {
     layerGuidance = `📍 CURRENT LAYER: TRANSITION
 - Connect the trigger to what it MEANS to them.
-- At most ONE question, and only if it helps.`;
+- Questions are optional; include only if it helps direction.`;
   } else if (effectiveLayer === 'EMOTION') {
     layerGuidance = `📍 CURRENT LAYER: EMOTION
 - Sit with the feeling. Slow down.
 - No timeline probing.
-- At most ONE question, and only if it helps.`;
+- Questions are optional; include only if it helps direction.`;
   } else {
     layerGuidance = `📍 CURRENT LAYER: CORE WOUND (PRESENCE MODE)
 - thoughtPattern MUST be exactly "Core Belief".
 - No timelines. No "when did this start".
 - patternNote: ONE sentence max.
-- question is OPTIONAL (prefer "" if unsure).
+- Questions are OPTIONAL (prefer none if unsure).
 - Avoid clichés and motivational poster language.`;
   }
 
@@ -644,14 +734,24 @@ Return ONLY valid JSON:
   "thoughtPattern": "CORE WOUND: must be 'Core Belief'. Otherwise: pattern name OR empty string.",
   "patternNote": "Brief. CORE WOUND: one sentence max.",
   "reframe": "Fresh angle, specific to their situation. If intent=NEXT_STEP, include a tiny plan (1–3 steps) inside reframe.",
-  "question": "ONE question max. Can be empty string.",
-  "encouragement": "Optional, natural, NOT generic."
+  "questions": [
+    "Candidate #1: a SPECIFIC question based on the user's latest message details (not generic).",
+    "Candidate #2: different angle, still specific and relevant.",
+    "Candidate #3: optional."
+  ],
+  "encouragement": "Natural, specific, NOT generic."
 }
 
+QUESTION RULES:
+- Each question must reference at least one concrete detail from the user's last message.
+- Never use generic questions like: "hardest part", "heaviest", "most personal", "story your mind keeps replaying", "tell me more".
+- Never repeat or lightly paraphrase prior questions from the warning list.
+- Avoid therapy-probing (no childhood/timeline/body-location interrogation).
+- If the user is stabilizing / saying thanks / feeling better, return an empty array [].
+
 STYLE RULES:
-- Do not force anxiety framing. Respond to the actual content.
-- If the message is mostly factual (deadline, tasks), do NOT force a distortion label.
-- Avoid repeating questions/reframes from warnings.
+- Do not force anxiety framing if it’s about work/deadlines/etc.
+- If the message is mostly factual, do NOT force a distortion label.
 - Avoid: "I hear you", "you’re not alone", "storm inside", "weather this storm", etc.`;
 }
 
@@ -671,35 +771,12 @@ function parseAIJSON(content: string): Record<string, unknown> | null {
       return null;
     }
   }
+  return null;
 }
 
 // ============================================================================
 // Output Quality: detect generic/templated responses + regenerate
 // ============================================================================
-
-function isGenericLine(s: string): boolean {
-  const t = normalizeForCompare(s);
-  if (!t) return true;
-
-  const generic = [
-    'you’re engaging with this',
-    'that takes real effort',
-    'just talking about it is a step',
-    'it matters that you’re showing up',
-    'let’s slow it down',
-    'pressure makes everything feel final',
-    'the feeling is real',
-    'not a verdict',
-    'i’m with you',
-    'that makes sense',
-    'you’re not alone',
-    'storm inside',
-    'weather this storm',
-  ];
-
-  if (t.length < 12) return true;
-  return generic.some(g => t.includes(g));
-}
 
 function needsRegeneration(
   out: { acknowledgment?: string; reframe?: string; encouragement?: string; question?: string },
@@ -710,17 +787,63 @@ function needsRegeneration(
   const r = (out.reframe || '').trim();
   const e = (out.encouragement || '').trim();
 
-  if (q && isDuplicateQuestion(q, previousQuestions)) return true;
+  if (q && (isDuplicateQuestion(q, previousQuestions) || isNearDuplicateQuestion(q, previousQuestions))) return true;
   if (r && isDuplicateReframe(r, previousReframes)) return true;
 
-  // If reframe/encouragement are generic, regenerate
+  // reframe/encouragement too generic => regen
   if (isGenericLine(r)) return true;
   if (e && isGenericLine(e)) return true;
 
-  // If reframe missing, regenerate
+  // missing reframe => regen
   if (!r) return true;
 
   return false;
+}
+
+async function regenerateQuestionsFresh(
+  analysis: AnalysisResult,
+  userText: string,
+  previousQuestions: string[],
+  previousReframes: string[],
+  intent: UserIntent,
+  groundingMode: boolean,
+  effectiveLayer: EffectiveLayer
+): Promise<Record<string, unknown> | null> {
+  const regenPrompt = `
+You are writing as a deeply emotionally intelligent FRIEND.
+
+User message: "${userText}"
+
+Intent: ${intent}
+Layer: ${effectiveLayer}
+Grounding mode: ${groundingMode ? 'true' : 'false'}
+
+What happened: ${analysis.trigger_event}
+Fear underneath: ${analysis.underlying_fear}
+Need: ${analysis.emotional_need}
+
+DO NOT reuse or lightly paraphrase any of these questions:
+${previousQuestions.slice(0, 25).map(q => `- ${q}`).join('\n') || '- (none)'}
+
+DO NOT reuse or lightly paraphrase any of these reframes (just avoid echoing their wording):
+${previousReframes.slice(0, 25).map(r => `- ${r}`).join('\n') || '- (none)'}
+
+Hard rules:
+- Generate 3 candidate questions that are SPECIFIC to the user's latest message (must include a concrete detail).
+- Avoid generic prompts: "hardest part", "heaviest", "most personal", "tell me more", "what would it look like", etc.
+- Avoid therapy probing (no childhood/timeline/body-location interrogation).
+- If user seems stabilized / saying thanks / feeling better, return [].
+
+Return ONLY valid JSON:
+{
+  "questions": ["...","...","..."]
+}
+`.trim();
+
+  const msgs: AIMessage[] = [{ role: 'system', content: regenPrompt }];
+  const res = await callAI(msgs);
+  if (!res?.content) return null;
+  return parseAIJSON(res.content);
 }
 
 async function regenerateFieldsFresh(
@@ -756,7 +879,8 @@ Hard rules:
 - Don’t force anxiety framing if it’s about work/deadlines/etc.
 - Distortion labels ONLY if clearly present and actually helpful; otherwise set thoughtPattern to "".
 - If intent is NEXT_STEP, put a tiny plan (1–3 steps) inside the reframe.
-- Ask at most ONE question, only if it genuinely helps.
+- Provide questions[] with 0–3 options (specific, non-generic); question is optional.
+- Ask at most ONE question in final output (we'll select from questions[]); it's OK to provide none.
 - Return ONLY valid JSON.
 
 JSON:
@@ -765,7 +889,7 @@ JSON:
   "thoughtPattern": "",
   "patternNote": "",
   "reframe": "...",
-  "question": "",
+  "questions": ["...","..."],
   "encouragement": ""
 }
 `.trim();
@@ -777,7 +901,7 @@ JSON:
 }
 
 // ============================================================================
-// Ensure ALL fields (with less template-y fallback behavior)
+// Ensure ALL fields (anti-template fallbacks + question selection)
 // ============================================================================
 
 function ensureAllLayers(
@@ -805,7 +929,7 @@ function ensureAllLayers(
   const snippet = userText.trim().slice(0, 90);
   const snippetIsShort = snippet.length < 25;
 
-  // Acknowledgment: light variety (but not required every time)
+  // Acknowledgment: minimal variety (fallback, but not huge template pools)
   const acknowledgmentOptions = effectiveLayer === 'CORE_WOUND'
     ? [
         `Ouch. That’s heavy to carry.`,
@@ -815,7 +939,6 @@ function ensureAllLayers(
       ]
     : [
         `Okay.`,
-        `Yeah — that makes sense.`,
         `Got it.`,
         snippetIsShort ? `"${snippet}" — noted.` : `Thanks for putting words to it.`,
       ];
@@ -882,10 +1005,8 @@ function ensureAllLayers(
     ? `You don’t have to solve everything right now — just take the next breath.`
     : fallbackReframeOptions[Math.floor(Math.random() * fallbackReframeOptions.length)];
 
-  // ✅ Big change: stop forcing canned questions (silence by default)
+  // Big change: stop forcing canned questions + canned encouragement
   const fallbackQuestion = '';
-
-  // ✅ Big change: stop forcing canned encouragement (silence by default)
   const fallbackEncouragement = groundingMode ? `Taking care of yourself is valid.` : '';
 
   const acknowledgment =
@@ -955,23 +1076,54 @@ function ensureAllLayers(
   let reframe = (parsed.reframe as string) || fallbackReframe;
   reframe = sanitizeReframeAllLayers(reframe, previousReframes, analysis, effectiveLayer);
 
-  // If duplicate reframe, keep it short and non-cliché (still avoid big template pools)
+  // If duplicate reframe, keep it short and non-cliché
   if (isDuplicateReframe(reframe, previousReframes)) {
     reframe = groundingMode
       ? `Let’s take one small breath here.`
-      : `Let’s pause for a second — this is feeling more final than it actually is.`;
+      : `Let’s pause — this is feeling more final than it actually is.`;
   }
 
-  // Question handling (silence by default; only keep if model provided and passes rules)
-  const questionValue = parsed.question as string | undefined;
-  const rawQuestion =
-    typeof questionValue === 'string' ? questionValue.trim() : fallbackQuestion;
+  // --------------------------------------------------------------------------
+  // Question handling (prefer generative candidates; strict filters)
+  // --------------------------------------------------------------------------
+
+  const candidatesRaw = Array.isArray((parsed as any).questions) ? (parsed as any).questions : [];
+  const candidates: string[] = candidatesRaw
+    .filter((x: any) => typeof x === 'string')
+    .map((x: string) => x.trim())
+    .filter(Boolean);
+
+  const pickCandidate = (qs: string[]) => {
+    for (const q0 of qs) {
+      const q1 = q0.endsWith('?') ? q0 : `${q0}?`;
+      if (!q1.trim()) continue;
+
+      if (isTherapistProbe(q1)) continue;
+      if (isGenericQuestion(q1)) continue;
+      if (isDuplicateQuestion(q1, previousQuestions)) continue;
+      if (isNearDuplicateQuestion(q1, previousQuestions)) continue;
+
+      return q1;
+    }
+    return '';
+  };
+
+  const modelPicked = pickCandidate(candidates);
+
+  // Fallback to parsed.question only if it passes filters
+  const single = typeof (parsed as any).question === 'string' ? (parsed as any).question.trim() : '';
+  const singleQ = single ? (single.endsWith('?') ? single : `${single}?`) : '';
+  const singleOk =
+    !!singleQ &&
+    !isTherapistProbe(singleQ) &&
+    !isGenericQuestion(singleQ) &&
+    !isDuplicateQuestion(singleQ, previousQuestions) &&
+    !isNearDuplicateQuestion(singleQ, previousQuestions);
 
   const finalRawQuestion =
-    (intent === 'LISTEN' || intent === 'CALM') &&
-    (!questionValue || !String(questionValue).trim())
+    (intent === 'LISTEN' || intent === 'CALM') && !modelPicked && !singleOk
       ? ''
-      : rawQuestion;
+      : modelPicked || (singleOk ? singleQ : '');
 
   const question = finalizeQuestion(
     finalRawQuestion,
@@ -1060,7 +1212,9 @@ export async function POST(request: NextRequest) {
     // Grounding mode
     const { groundingMode, groundingTurns } = isInGroundingMode(sessionContext, sanitizedMessage);
 
+    // ------------------------------------------------------------------------
     // Phase 1: Analysis
+    // ------------------------------------------------------------------------
     const analysisMessages: AIMessage[] = [{ role: 'system', content: buildAnalysisPrompt() }];
 
     if (conversationHistory.length > 0) {
@@ -1085,7 +1239,9 @@ export async function POST(request: NextRequest) {
       if (parsedAnalysis) analysis = parsedAnalysis;
     }
 
+    // ------------------------------------------------------------------------
     // Phase 2: Response
+    // ------------------------------------------------------------------------
     const coreBeliefPatterns = [
       /i am not (built|made|cut out|good|smart|capable|worthy|enough|lovable|deserving)/i,
       /i'm not (built|made|cut out|good|smart|capable|worthy|enough|lovable|deserving)/i,
@@ -1242,7 +1398,46 @@ export async function POST(request: NextRequest) {
       intent
     );
 
-    // ✅ If repetitive/generic, regenerate fresh fields with the model (no canned fallback pools)
+    // If the question candidates got rejected and intent wants direction, regen QUESTIONS once
+    const currentQuestion = String((completeResponse as any).question || '').trim();
+    const shouldPreferQuestion =
+      intent === 'NEXT_STEP' || intent === 'CLARITY' || intent === 'MEANING';
+
+    if (shouldPreferQuestion && !groundingMode && !currentQuestion) {
+      const regenQ = await regenerateQuestionsFresh(
+        analysis,
+        sanitizedMessage,
+        previousQuestions,
+        previousReframes,
+        intent,
+        groundingMode,
+        effectiveLayer
+      );
+
+      if (regenQ) {
+        // merge regenerated questions into existing parsed output
+        const merged = {
+          ...(parsed || {}),
+          questions: (regenQ as any).questions,
+        };
+
+        completeResponse = ensureAllLayers(
+          merged,
+          analysis,
+          effectiveLayer,
+          sanitizedMessage,
+          previousReframes,
+          previousQuestions,
+          frozenThoughtPattern,
+          previousDistortion,
+          groundingMode,
+          lastQuestionType,
+          intent
+        );
+      }
+    }
+
+    // If repetitive/generic overall, regenerate fresh fields once (no canned pools)
     if (
       needsRegeneration(
         {

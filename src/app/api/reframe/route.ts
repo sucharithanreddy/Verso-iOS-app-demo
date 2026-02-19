@@ -27,8 +27,14 @@ interface SessionContext {
   previousTopics?: string[];
   previousDistortions?: string[];
   sessionCount?: number;
+
   previousQuestions?: string[];
   previousReframes?: string[];
+
+  // ✅ NEW (optional, backwards-compatible):
+  previousAcknowledgments?: string[];
+  previousEncouragements?: string[];
+
   originalTrigger?: string;
   coreBeliefAlreadyDetected?: boolean;
   groundingMode?: boolean;
@@ -56,7 +62,7 @@ function normalizeForCompare(s: string): string {
 }
 
 // ============================================================================
-// Hard Block Exact Repetition (questions + reframes + pattern notes)
+// Hard Block Exact Repetition (questions + reframes + pattern notes + ack/enc)
 // ============================================================================
 
 function isDuplicateReframe(reframe: string, previousReframes: string[]): boolean {
@@ -74,8 +80,18 @@ function isDuplicatePatternNote(note: string, previousNotes: string[]): boolean 
   return previousNotes.map(normalizeForCompare).some(prev => prev === cur);
 }
 
+function isDuplicateAck(a: string, previous: string[]): boolean {
+  const cur = normalizeForCompare(a);
+  return previous.map(normalizeForCompare).some(prev => prev === cur);
+}
+
+function isDuplicateEnc(e: string, previous: string[]): boolean {
+  const cur = normalizeForCompare(e);
+  return previous.map(normalizeForCompare).some(prev => prev === cur);
+}
+
 // ============================================================================
-// Near-duplicate detection (Jaccard overlap) + generic detection
+// Near-duplicate detection (Jaccard overlap) to stop paraphrase repeats
 // ============================================================================
 
 function tokenize(s: string): string[] {
@@ -92,78 +108,16 @@ function jaccardSimilarity(a: string, b: string): number {
   const A = new Set(tokenize(a));
   const B = new Set(tokenize(b));
   if (A.size === 0 || B.size === 0) return 0;
+
   let inter = 0;
   for (const w of A) if (B.has(w)) inter++;
   const union = A.size + B.size - inter;
   return union === 0 ? 0 : inter / union;
 }
 
-function isNearDuplicateQuestion(q: string, previous: string[], threshold = 0.62): boolean {
-  const cur = normalizeForCompare(q);
-  return previous.some(p => jaccardSimilarity(cur, normalizeForCompare(p)) >= threshold);
-}
-
-function isGenericLine(s: string): boolean {
-  const t = normalizeForCompare(s);
-  if (!t) return true;
-
-  // “Poster lines” + repeated vibe-lines seen in your logs
-  const generic = [
-    "you're not alone",
-    "you are not alone",
-    'storm inside',
-    'weather this storm',
-    "it’s okay to feel this way",
-    "it's okay to feel this way",
-    "i hear you",
-    'that sounds',
-    'it seems like',
-    "i understand",
-    'must be hard',
-    'take a step back',
-    'prioritize your well-being',
-    'you’ve got this',
-    "you've got this",
-    "one step at a time",
-    'you’re engaging with this',
-    "you're engaging with this",
-    'that takes real effort',
-    'just talking about it is a step',
-    'it matters that you’re showing up',
-    "it matters that you're showing up",
-    'let’s slow it down',
-    "let's slow it down",
-    'pressure makes everything feel final',
-    'the feeling is real',
-    'not a verdict',
-    "i'm with you",
-    'that makes sense',
-  ];
-
-  if (t.length < 12) return true;
-  return generic.some(g => t.includes(g));
-}
-
-function isGenericQuestion(q: string): boolean {
-  const s = (q || '').toLowerCase().trim();
-  if (!s) return true;
-
-  const banned = [
-    "what's the hardest part",
-    'what’s the hardest part',
-    'what feels heaviest',
-    'what part of this feels most personal',
-    "what's the story your mind keeps replaying",
-    'what’s the story your mind keeps replaying',
-    'tell me more',
-    'explore more deeply',
-    'what would it look like',
-    'what would it feel like',
-    'how does that feel in your body',
-    'where do you feel it',
-  ];
-
-  return banned.some(b => s.includes(b));
+function isNearDuplicateText(cur: string, previous: string[], threshold = 0.62): boolean {
+  const c = normalizeForCompare(cur);
+  return previous.some(p => jaccardSimilarity(c, normalizeForCompare(p)) >= threshold);
 }
 
 // ============================================================================
@@ -240,6 +194,7 @@ function adjustDistortionForIdentityStatement(
   if (identityPatterns.some(p => p.test(userText)) && effectiveLayer !== 'CORE_WOUND') {
     return 'Labeling';
   }
+
   return thoughtPattern;
 }
 
@@ -305,7 +260,11 @@ function isInGroundingMode(
   const previousTurns = sessionContext?.groundingTurns ?? 0;
 
   if (justChoseGrounding) return { groundingMode: true, groundingTurns: 1 };
-  if (wasInGroundingMode && previousTurns < 3) return { groundingMode: true, groundingTurns: previousTurns + 1 };
+
+  if (wasInGroundingMode && previousTurns < 3) {
+    return { groundingMode: true, groundingTurns: previousTurns + 1 };
+  }
+
   return { groundingMode: false, groundingTurns: 0 };
 }
 
@@ -328,7 +287,6 @@ function isTherapistProbe(q: string): boolean {
 
   if (triggers.some(t => s.includes(t))) return true;
   if (/^when did\b/.test(s)) return true;
-
   return false;
 }
 
@@ -382,9 +340,7 @@ function finalizeQuestion(
 
   // Don't ask another choice question if last was choice
   const isChoiceQ = isChoiceQuestionText(q);
-  if (lastQuestionType === 'choice' && isChoiceQ) {
-    return ''; // silence > templates
-  }
+  if (lastQuestionType === 'choice' && isChoiceQ) return '';
 
   // Non-core: one sentence max, silence if duplicate/probe
   if (effectiveLayer !== 'CORE_WOUND') {
@@ -478,12 +434,8 @@ function coerceThoughtPatternByLayer(thoughtPattern: string, effectiveLayer: Eff
   const p = normalizeThoughtPattern(thoughtPattern);
   const isCore = p.toLowerCase() === 'core belief';
 
-  if (effectiveLayer !== 'CORE_WOUND' && isCore) {
-    return 'Catastrophizing';
-  }
-
+  if (effectiveLayer !== 'CORE_WOUND' && isCore) return 'Catastrophizing';
   if (effectiveLayer === 'CORE_WOUND') return 'Core Belief';
-
   return p;
 }
 
@@ -572,30 +524,235 @@ function compactTwoSentences(text: string): string {
 }
 
 // ============================================================================
-// Hydrate memory from history
+// JSON Parser
+// ============================================================================
+
+function parseAIJSON(content: string): Record<string, unknown> | null {
+  try {
+    return JSON.parse(content);
+  } catch {
+    try {
+      const cleaned = content.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+      if (jsonMatch) return JSON.parse(jsonMatch[0]);
+    } catch {
+      return null;
+    }
+  }
+}
+
+// ============================================================================
+// Hydrate memory from history (now includes ack + encouragement too)
 // ============================================================================
 
 function hydrateMemoryFromHistory(
   conversationHistory: ChatMessage[],
   previousQuestions: string[],
-  previousReframes: string[]
+  previousReframes: string[],
+  previousAcknowledgments: string[],
+  previousEncouragements: string[]
 ): void {
   const recentAssistant = conversationHistory
     .filter(m => m.role === 'assistant')
-    .slice(-10);
+    .slice(-12);
 
   for (const msg of recentAssistant) {
     if (!msg.content) continue;
-
     const parsedPrev = parseAIJSON(msg.content);
     if (!parsedPrev) continue;
 
     const q = (parsedPrev.question as string) || (parsedPrev.probingQuestion as string);
     const r = (parsedPrev.reframe as string);
+    const a = (parsedPrev.acknowledgment as string) || (parsedPrev.content as string);
+    const e = (parsedPrev.encouragement as string);
 
-    if (q && q.trim() && previousQuestions.length < 25) previousQuestions.push(q.trim());
-    if (r && r.trim() && previousReframes.length < 25) previousReframes.push(r.trim());
+    if (q && q.trim() && previousQuestions.length < 35) previousQuestions.push(q.trim());
+    if (r && r.trim() && previousReframes.length < 35) previousReframes.push(r.trim());
+    if (a && a.trim() && previousAcknowledgments.length < 35) previousAcknowledgments.push(a.trim());
+    if (e && e.trim() && previousEncouragements.length < 35) previousEncouragements.push(e.trim());
   }
+}
+
+// ============================================================================
+// Output Quality: detect generic/templated responses + regenerate
+// ============================================================================
+
+function isGenericLine(s: string): boolean {
+  const t = normalizeForCompare(s);
+  if (!t) return true;
+
+  // If it's super short, it often reads canned
+  if (t.length < 10) return true;
+
+  const generic = [
+    // classic posters / repeated
+    "you're not alone",
+    'storm inside',
+    'weather this storm',
+    'take it one step at a time',
+    'you got this',
+    'you are stronger than you think',
+    'stay strong',
+    // your observed repeats
+    'you’re engaging with this',
+    'that takes real effort',
+    'just talking about it is a step',
+    'it matters that you’re showing up',
+    'let’s slow it down',
+    'pressure makes everything feel final',
+    'the feeling is real',
+    'not a verdict',
+    'i’m with you',
+    'that makes sense',
+    // overly therapist-y
+    'i hear you',
+    'i understand',
+    'that sounds',
+    'it seems like',
+  ];
+
+  return generic.some(g => t.includes(g));
+}
+
+function isGenericQuestion(q: string): boolean {
+  const s = (q || '').toLowerCase().trim();
+  if (!s) return true;
+
+  const banned = [
+    "what's the hardest part",
+    'what feels heaviest',
+    'what part of this feels most personal',
+    "what’s the story your mind keeps replaying",
+    "what's the story your mind keeps replaying",
+    'tell me more',
+    'explore more deeply',
+    'where in your body',
+  ];
+
+  if (s.length < 14) return true;
+  return banned.some(b => s.includes(b));
+}
+
+function needsRegeneration(
+  out: { acknowledgment?: string; reframe?: string; encouragement?: string; question?: string },
+  previousReframes: string[],
+  previousQuestions: string[],
+  previousAcknowledgments: string[],
+  previousEncouragements: string[]
+): boolean {
+  const a = (out.acknowledgment || '').trim();
+  const q = (out.question || '').trim();
+  const r = (out.reframe || '').trim();
+  const e = (out.encouragement || '').trim();
+
+  // ack must exist and not be generic
+  if (!a || isGenericLine(a)) return true;
+
+  if (q) {
+    if (isGenericQuestion(q)) return true;
+    if (isDuplicateQuestion(q, previousQuestions)) return true;
+    if (isNearDuplicateText(q, previousQuestions)) return true;
+  }
+
+  if (!r) return true;
+  if (isGenericLine(r)) return true;
+  if (isDuplicateReframe(r, previousReframes)) return true;
+
+  if (e) {
+    if (isGenericLine(e)) return true;
+    if (isDuplicateEnc(e, previousEncouragements)) return true;
+    if (isNearDuplicateText(e, previousEncouragements)) return true;
+  }
+
+  // Optional: avoid repeating acknowledgments too
+  if (a) {
+    if (isDuplicateAck(a, previousAcknowledgments)) return true;
+    if (isNearDuplicateText(a, previousAcknowledgments)) return true;
+  }
+
+  return false;
+}
+
+// ============================================================================
+// Regeneration: generate fresh candidates (ack + encouragement + question + reframe)
+// ============================================================================
+
+async function regeneratePackFresh(args: {
+  analysis: AnalysisResult;
+  userText: string;
+  intent: UserIntent;
+  groundingMode: boolean;
+  effectiveLayer: EffectiveLayer;
+  previousQuestions: string[];
+  previousReframes: string[];
+  previousAcknowledgments: string[];
+  previousEncouragements: string[];
+}): Promise<Record<string, unknown> | null> {
+  const {
+    analysis,
+    userText,
+    intent,
+    groundingMode,
+    effectiveLayer,
+    previousQuestions,
+    previousReframes,
+    previousAcknowledgments,
+    previousEncouragements,
+  } = args;
+
+  const regenPrompt = `
+You are writing as a deeply emotionally intelligent FRIEND.
+
+User message: "${userText}"
+
+Intent: ${intent}
+Layer: ${effectiveLayer}
+Grounding mode: ${groundingMode ? 'true' : 'false'}
+
+What happened: ${analysis.trigger_event}
+Interpretation: ${analysis.likely_interpretation}
+Fear underneath: ${analysis.underlying_fear}
+Need: ${analysis.emotional_need}
+Core wound (if any): ${analysis.core_wound || ''}
+
+DO NOT reuse or lightly paraphrase any of these acknowledgments:
+${previousAcknowledgments.slice(0, 25).map(x => `- ${x}`).join('\n') || '- (none)'}
+
+DO NOT reuse or lightly paraphrase any of these encouragements:
+${previousEncouragements.slice(0, 25).map(x => `- ${x}`).join('\n') || '- (none)'}
+
+DO NOT reuse or lightly paraphrase any of these questions:
+${previousQuestions.slice(0, 25).map(q => `- ${q}`).join('\n') || '- (none)'}
+
+DO NOT reuse or lightly paraphrase any of these reframes:
+${previousReframes.slice(0, 25).map(r => `- ${r}`).join('\n') || '- (none)'}
+
+Hard rules:
+- Acknowledgment MUST be non-empty and specific (no "you're not alone", no "storm", no "I hear you").
+- Encouragement optional, but if present it must be natural, not poster-y.
+- Questions must be specific to the user's last message (use at least one concrete detail). Avoid generic templates.
+- Ask at most ONE question (but you may provide up to 3 candidates in "questions").
+- Distortion labels ONLY if clearly present and actually helpful; otherwise set thoughtPattern to "".
+- If intent is NEXT_STEP, put a tiny plan (1–3 steps) inside the reframe.
+- Return ONLY valid JSON.
+
+JSON:
+{
+  "acknowledgments": ["...","..."],
+  "acknowledgment": "pick your best one here too",
+  "thoughtPattern": "",
+  "patternNote": "",
+  "reframe": "...",
+  "questions": ["...","...","..."],
+  "encouragements": ["...","..."],
+  "encouragement": ""
+}
+`.trim();
+
+  const msgs: AIMessage[] = [{ role: 'system', content: regenPrompt }];
+  const res = await callAI(msgs);
+  if (!res?.content) return null;
+  return parseAIJSON(res.content);
 }
 
 // ============================================================================
@@ -626,6 +783,8 @@ function buildResponsePrompt(
   analysis: AnalysisResult,
   previousQuestions: string[] = [],
   previousReframes: string[] = [],
+  previousAcknowledgments: string[] = [],
+  previousEncouragements: string[] = [],
   originalTrigger: string = '',
   turnCount: number = 1,
   userRevealedCoreBelief: boolean = false,
@@ -634,16 +793,30 @@ function buildResponsePrompt(
   intent: UserIntent = 'AUTO'
 ): string {
   const questionsWarning = previousQuestions.length > 0
-    ? `\n\n⚠️ QUESTIONS YOU'VE ALREADY ASKED - NEVER REPEAT OR LIGHTLY PARAPHRASE:\n${previousQuestions
-        .slice(0, 12)
+    ? `\n\n⚠️ QUESTIONS YOU'VE ALREADY ASKED - NEVER REPEAT OR PARAPHRASE:\n${previousQuestions
+        .slice(0, 10)
         .map(q => `- "${q}"`)
         .join('\n')}`
     : '';
 
   const reframesWarning = previousReframes.length > 0
-    ? `\n\n⚠️ REFRAMES YOU'VE ALREADY USED - NEVER REPEAT OR LIGHTLY PARAPHRASE:\n${previousReframes
-        .slice(0, 10)
+    ? `\n\n⚠️ REFRAMES YOU'VE ALREADY USED - NEVER REPEAT OR PARAPHRASE:\n${previousReframes
+        .slice(0, 8)
         .map(r => `- "${r}"`)
+        .join('\n')}`
+    : '';
+
+  const ackWarning = previousAcknowledgments.length > 0
+    ? `\n\n⚠️ ACKNOWLEDGMENTS YOU'VE ALREADY USED - NEVER REPEAT OR PARAPHRASE:\n${previousAcknowledgments
+        .slice(0, 8)
+        .map(a => `- "${a}"`)
+        .join('\n')}`
+    : '';
+
+  const encWarning = previousEncouragements.length > 0
+    ? `\n\n⚠️ ENCOURAGEMENTS YOU'VE ALREADY USED - NEVER REPEAT OR PARAPHRASE:\n${previousEncouragements
+        .slice(0, 8)
+        .map(e => `- "${e}"`)
         .join('\n')}`
     : '';
 
@@ -655,26 +828,33 @@ function buildResponsePrompt(
 
 ${intentBlock}
 
+${ackWarning}${encWarning}${questionsWarning}
+
 Return ONLY valid JSON:
 
 {
-  "acknowledgment": "Brief, warm. No cognitive analysis. Just presence.",
+  "acknowledgments": [
+    "Option #1: specific and human (no therapy clichés)",
+    "Option #2: different angle, also specific"
+  ],
+  "acknowledgment": "choose your best",
   "thoughtPattern": "",
   "patternNote": "",
   "reframe": "Gentle, practical. Present-moment. Sensory if helpful.",
-  "questions": [],
+  "questions": [
+    "Optional: one simple present-moment question (specific), OR return []"
+  ],
+  "encouragements": [
+    "Optional: one natural supportive line (NOT poster-y), OR return []"
+  ],
   "encouragement": ""
 }
-
-QUESTION RULES:
-- If you include questions at all, include at most ONE and make it very present-moment, practical, and not generic.
-- It is totally okay to return an empty array [].
 
 STYLE RULES:
 - NO distortion labels
 - NO deep probing
-- Keep it human and specific, not templated.
-- Avoid motivational poster lines.`;
+- Keep it human and specific, not templated
+- Avoid: "you're not alone", "storm", "weather this", "I hear you".`;
   }
 
   const effectiveLayer: EffectiveLayer = userRevealedCoreBelief
@@ -692,22 +872,22 @@ STYLE RULES:
     layerGuidance = `📍 CURRENT LAYER: SURFACE
 - Be curious, not clinical.
 - Track what happened + what it means.
-- Questions are optional; include only if it helps direction.`;
+- At most ONE question, and only if it helps.`;
   } else if (effectiveLayer === 'TRANSITION') {
     layerGuidance = `📍 CURRENT LAYER: TRANSITION
 - Connect the trigger to what it MEANS to them.
-- Questions are optional; include only if it helps direction.`;
+- At most ONE question, and only if it helps.`;
   } else if (effectiveLayer === 'EMOTION') {
     layerGuidance = `📍 CURRENT LAYER: EMOTION
 - Sit with the feeling. Slow down.
 - No timeline probing.
-- Questions are optional; include only if it helps direction.`;
+- At most ONE question, and only if it helps.`;
   } else {
     layerGuidance = `📍 CURRENT LAYER: CORE WOUND (PRESENCE MODE)
 - thoughtPattern MUST be exactly "Core Belief".
 - No timelines. No "when did this start".
 - patternNote: ONE sentence max.
-- Questions are OPTIONAL (prefer none if unsure).
+- question is OPTIONAL (prefer "" if unsure).
 - Avoid clichés and motivational poster language.`;
   }
 
@@ -724,184 +904,100 @@ YOUR ANALYSIS (beneath the words):
 - What they need: ${analysis.emotional_need}
 - The wound this touches: ${analysis.core_wound}
 
-${questionsWarning}${reframesWarning}
+${questionsWarning}${reframesWarning}${ackWarning}${encWarning}
 ${layerGuidance}
 
 Return ONLY valid JSON:
 
 {
-  "acknowledgment": "Specific, grounded, human. Avoid canned empathy.",
+  "acknowledgments": [
+    "Candidate #1: specific, grounded, not cliché",
+    "Candidate #2: different angle, also specific"
+  ],
+  "acknowledgment": "pick your best one here too",
   "thoughtPattern": "CORE WOUND: must be 'Core Belief'. Otherwise: pattern name OR empty string.",
   "patternNote": "Brief. CORE WOUND: one sentence max.",
   "reframe": "Fresh angle, specific to their situation. If intent=NEXT_STEP, include a tiny plan (1–3 steps) inside reframe.",
   "questions": [
-    "Candidate #1: a SPECIFIC question based on the user's latest message details (not generic).",
-    "Candidate #2: different angle, still specific and relevant.",
-    "Candidate #3: optional."
+    "Candidate #1 question: MUST use at least one concrete detail from the user's last message",
+    "Candidate #2 question: different angle, also concrete and specific",
+    "Candidate #3 optional"
   ],
-  "encouragement": "Natural, specific, NOT generic."
-}
-
-QUESTION RULES:
-- Each question must reference at least one concrete detail from the user's last message.
-- Never use generic questions like: "hardest part", "heaviest", "most personal", "story your mind keeps replaying", "tell me more".
-- Never repeat or lightly paraphrase prior questions from the warning list.
-- Avoid therapy-probing (no childhood/timeline/body-location interrogation).
-- If the user is stabilizing / saying thanks / feeling better, return an empty array [].
-
-STYLE RULES:
-- Do not force anxiety framing if it’s about work/deadlines/etc.
-- If the message is mostly factual, do NOT force a distortion label.
-- Avoid: "I hear you", "you’re not alone", "storm inside", "weather this storm", etc.`;
-}
-
-// ============================================================================
-// JSON Parser
-// ============================================================================
-
-function parseAIJSON(content: string): Record<string, unknown> | null {
-  try {
-    return JSON.parse(content);
-  } catch {
-    try {
-      const cleaned = content.replace(/```json/gi, '').replace(/```/g, '').trim();
-      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-      if (jsonMatch) return JSON.parse(jsonMatch[0]);
-    } catch {
-      return null;
-    }
-  }
-  return null;
-}
-
-// ============================================================================
-// Output Quality: detect generic/templated responses + regenerate
-// ============================================================================
-
-function needsRegeneration(
-  out: { acknowledgment?: string; reframe?: string; encouragement?: string; question?: string },
-  previousReframes: string[],
-  previousQuestions: string[]
-): boolean {
-  const q = (out.question || '').trim();
-  const r = (out.reframe || '').trim();
-  const e = (out.encouragement || '').trim();
-
-  if (q && (isDuplicateQuestion(q, previousQuestions) || isNearDuplicateQuestion(q, previousQuestions))) return true;
-  if (r && isDuplicateReframe(r, previousReframes)) return true;
-
-  // reframe/encouragement too generic => regen
-  if (isGenericLine(r)) return true;
-  if (e && isGenericLine(e)) return true;
-
-  // missing reframe => regen
-  if (!r) return true;
-
-  return false;
-}
-
-async function regenerateQuestionsFresh(
-  analysis: AnalysisResult,
-  userText: string,
-  previousQuestions: string[],
-  previousReframes: string[],
-  intent: UserIntent,
-  groundingMode: boolean,
-  effectiveLayer: EffectiveLayer
-): Promise<Record<string, unknown> | null> {
-  const regenPrompt = `
-You are writing as a deeply emotionally intelligent FRIEND.
-
-User message: "${userText}"
-
-Intent: ${intent}
-Layer: ${effectiveLayer}
-Grounding mode: ${groundingMode ? 'true' : 'false'}
-
-What happened: ${analysis.trigger_event}
-Fear underneath: ${analysis.underlying_fear}
-Need: ${analysis.emotional_need}
-
-DO NOT reuse or lightly paraphrase any of these questions:
-${previousQuestions.slice(0, 25).map(q => `- ${q}`).join('\n') || '- (none)'}
-
-DO NOT reuse or lightly paraphrase any of these reframes (just avoid echoing their wording):
-${previousReframes.slice(0, 25).map(r => `- ${r}`).join('\n') || '- (none)'}
-
-Hard rules:
-- Generate 3 candidate questions that are SPECIFIC to the user's latest message (must include a concrete detail).
-- Avoid generic prompts: "hardest part", "heaviest", "most personal", "tell me more", "what would it look like", etc.
-- Avoid therapy probing (no childhood/timeline/body-location interrogation).
-- If user seems stabilized / saying thanks / feeling better, return [].
-
-Return ONLY valid JSON:
-{
-  "questions": ["...","...","..."]
-}
-`.trim();
-
-  const msgs: AIMessage[] = [{ role: 'system', content: regenPrompt }];
-  const res = await callAI(msgs);
-  if (!res?.content) return null;
-  return parseAIJSON(res.content);
-}
-
-async function regenerateFieldsFresh(
-  analysis: AnalysisResult,
-  userText: string,
-  previousQuestions: string[],
-  previousReframes: string[],
-  intent: UserIntent,
-  groundingMode: boolean,
-  effectiveLayer: EffectiveLayer
-): Promise<Record<string, unknown> | null> {
-  const regenPrompt = `
-You are writing as a deeply emotionally intelligent FRIEND.
-
-User message: "${userText}"
-
-Intent: ${intent}
-Layer: ${effectiveLayer}
-Grounding mode: ${groundingMode ? 'true' : 'false'}
-
-What happened: ${analysis.trigger_event}
-Fear underneath: ${analysis.underlying_fear}
-Need: ${analysis.emotional_need}
-
-DO NOT reuse or lightly paraphrase any of these questions:
-${previousQuestions.slice(0, 25).map(q => `- ${q}`).join('\n') || '- (none)'}
-
-DO NOT reuse or lightly paraphrase any of these reframes:
-${previousReframes.slice(0, 25).map(r => `- ${r}`).join('\n') || '- (none)'}
-
-Hard rules:
-- Sound natural and situation-specific. No therapy clichés. No motivational poster lines.
-- Don’t force anxiety framing if it’s about work/deadlines/etc.
-- Distortion labels ONLY if clearly present and actually helpful; otherwise set thoughtPattern to "".
-- If intent is NEXT_STEP, put a tiny plan (1–3 steps) inside the reframe.
-- Provide questions[] with 0–3 options (specific, non-generic); question is optional.
-- Ask at most ONE question in final output (we'll select from questions[]); it's OK to provide none.
-- Return ONLY valid JSON.
-
-JSON:
-{
-  "acknowledgment": "...",
-  "thoughtPattern": "",
-  "patternNote": "",
-  "reframe": "...",
-  "questions": ["...","..."],
+  "encouragements": [
+    "Candidate #1 encouragement: natural and specific (NOT poster-y)",
+    "Candidate #2: different angle (still natural)"
+  ],
   "encouragement": ""
 }
-`.trim();
 
-  const msgs: AIMessage[] = [{ role: 'system', content: regenPrompt }];
-  const res = await callAI(msgs);
-  if (!res?.content) return null;
-  return parseAIJSON(res.content);
+RULES:
+- Acknowledgment must be non-empty and specific (no 'you're not alone', no 'storm', no 'I hear you').
+- Avoid repeating or lightly paraphrasing warnings.
+- Questions: at most one will be used; keep candidates specific, avoid generic templates:
+  banned: "hardest part", "heaviest", "most personal", "story your mind keeps replaying", "tell me more".
+- Avoid therapy-probing (no childhood/timeline/body-location interrogation).
+- If user is stabilizing / saying thanks / feeling better, return "questions": [].
+- Encouragement optional; if present, must not be motivational poster language.`;
 }
 
 // ============================================================================
-// Ensure ALL fields (anti-template fallbacks + question selection)
+// Candidate pickers (anti-template selection)
+// ============================================================================
+
+function coerceQuestionMark(s: string): string {
+  const t = (s || '').trim();
+  if (!t) return '';
+  return t.endsWith('?') ? t : `${t}?`;
+}
+
+function pickBestQuestionCandidate(
+  candidates: string[],
+  previousQuestions: string[]
+): string {
+  for (const raw of candidates) {
+    const q = coerceQuestionMark(raw);
+    if (!q) continue;
+    if (isTherapistProbe(q)) continue;
+    if (isGenericQuestion(q)) continue;
+    if (isDuplicateQuestion(q, previousQuestions)) continue;
+    if (isNearDuplicateText(q, previousQuestions)) continue;
+    return q;
+  }
+  return '';
+}
+
+function pickBestAckCandidate(
+  candidates: string[],
+  previousAcknowledgments: string[]
+): string {
+  for (const raw of candidates) {
+    const a = (raw || '').trim();
+    if (!a) continue;
+    if (isGenericLine(a)) continue;
+    if (isDuplicateAck(a, previousAcknowledgments)) continue;
+    if (isNearDuplicateText(a, previousAcknowledgments)) continue;
+    return a;
+  }
+  return '';
+}
+
+function pickBestEncCandidate(
+  candidates: string[],
+  previousEncouragements: string[]
+): string {
+  for (const raw of candidates) {
+    const e = (raw || '').trim();
+    if (!e) continue;
+    if (isGenericLine(e)) continue;
+    if (isDuplicateEnc(e, previousEncouragements)) continue;
+    if (isNearDuplicateText(e, previousEncouragements)) continue;
+    return e;
+  }
+  return '';
+}
+
+// ============================================================================
+// Ensure ALL fields (with anti-template selection + minimal fallback pools)
 // ============================================================================
 
 function ensureAllLayers(
@@ -911,6 +1007,8 @@ function ensureAllLayers(
   userText: string,
   previousReframes: string[],
   previousQuestions: string[],
+  previousAcknowledgments: string[],
+  previousEncouragements: string[],
   frozenThoughtPattern?: string,
   previousDistortion?: string,
   groundingMode: boolean = false,
@@ -929,7 +1027,7 @@ function ensureAllLayers(
   const snippet = userText.trim().slice(0, 90);
   const snippetIsShort = snippet.length < 25;
 
-  // Acknowledgment: minimal variety (fallback, but not huge template pools)
+  // Acknowledgment fallback pool (non-empty, but not huge template bank)
   const acknowledgmentOptions = effectiveLayer === 'CORE_WOUND'
     ? [
         `Ouch. That’s heavy to carry.`,
@@ -940,6 +1038,7 @@ function ensureAllLayers(
     : [
         `Okay.`,
         `Got it.`,
+        `Yeah — that makes sense.`,
         snippetIsShort ? `"${snippet}" — noted.` : `Thanks for putting words to it.`,
       ];
 
@@ -966,7 +1065,7 @@ function ensureAllLayers(
             `When you’re depleted, thoughts get more absolute.`,
           ];
 
-  const priorNotesPool = [...previousQuestions, ...previousReframes];
+  const priorNotesPool = [...previousQuestions, ...previousReframes, ...previousAcknowledgments, ...previousEncouragements];
   let fallbackPatternNote = patternNoteOptions[Math.floor(Math.random() * patternNoteOptions.length)];
   if (fallbackPatternNote && isDuplicatePatternNote(fallbackPatternNote, priorNotesPool)) {
     const alt = patternNoteOptions.find(n => n && !isDuplicatePatternNote(n, priorNotesPool));
@@ -1005,16 +1104,35 @@ function ensureAllLayers(
     ? `You don’t have to solve everything right now — just take the next breath.`
     : fallbackReframeOptions[Math.floor(Math.random() * fallbackReframeOptions.length)];
 
-  // Big change: stop forcing canned questions + canned encouragement
+  // Default: silence (we only keep question/enc if model provides good candidates)
   const fallbackQuestion = '';
   const fallbackEncouragement = groundingMode ? `Taking care of yourself is valid.` : '';
 
-  const acknowledgment =
-    typeof parsed.acknowledgment === 'string' && parsed.acknowledgment.trim()
-      ? parsed.acknowledgment
-      : fallbackAcknowledgment;
+  // --- Acknowledgment selection (candidate list + filter + fallback) ---
+  const ackCandidatesRaw = Array.isArray((parsed as any).acknowledgments) ? (parsed as any).acknowledgments : [];
+  const ackCandidates: string[] = ackCandidatesRaw
+    .filter((x: any) => typeof x === 'string')
+    .map((x: string) => x.trim())
+    .filter(Boolean);
 
-  // Thought pattern: allow blank when it doesn’t fit (esp CALM/LISTEN)
+  const ackFromList = pickBestAckCandidate(ackCandidates, previousAcknowledgments);
+
+  const singleAck = typeof (parsed as any).acknowledgment === 'string'
+    ? String((parsed as any).acknowledgment).trim()
+    : typeof (parsed as any).content === 'string'
+      ? String((parsed as any).content).trim()
+      : '';
+
+  const singleAckOk =
+    !!singleAck &&
+    !isGenericLine(singleAck) &&
+    !isDuplicateAck(singleAck, previousAcknowledgments) &&
+    !isNearDuplicateText(singleAck, previousAcknowledgments);
+
+  // ACK MUST BE NON-EMPTY (your preference)
+  const acknowledgment = ackFromList || (singleAckOk ? singleAck : fallbackAcknowledgment);
+
+  // --- Thought pattern behavior: allow blank when it doesn’t fit (esp CALM/LISTEN) ---
   let thoughtPattern: string;
 
   const rawPatternCandidate =
@@ -1077,56 +1195,36 @@ function ensureAllLayers(
   reframe = sanitizeReframeAllLayers(reframe, previousReframes, analysis, effectiveLayer);
 
   // If duplicate reframe, keep it short and non-cliché
-  if (isDuplicateReframe(reframe, previousReframes)) {
+  if (isDuplicateReframe(reframe, previousReframes) || isNearDuplicateText(reframe, previousReframes)) {
     reframe = groundingMode
       ? `Let’s take one small breath here.`
-      : `Let’s pause — this is feeling more final than it actually is.`;
+      : `Let’s pause for a second — this is feeling more final than it actually is.`;
   }
 
-  // --------------------------------------------------------------------------
-  // Question handling (prefer generative candidates; strict filters)
-  // --------------------------------------------------------------------------
-
-  const candidatesRaw = Array.isArray((parsed as any).questions) ? (parsed as any).questions : [];
-  const candidates: string[] = candidatesRaw
+  // --- Question handling (candidate list + filters; silence by default) ---
+  const qCandidatesRaw = Array.isArray((parsed as any).questions) ? (parsed as any).questions : [];
+  const qCandidates: string[] = qCandidatesRaw
     .filter((x: any) => typeof x === 'string')
     .map((x: string) => x.trim())
     .filter(Boolean);
 
-  const pickCandidate = (qs: string[]) => {
-    for (const q0 of qs) {
-      const q1 = q0.endsWith('?') ? q0 : `${q0}?`;
-      if (!q1.trim()) continue;
+  const qFromList = pickBestQuestionCandidate(qCandidates, previousQuestions);
 
-      if (isTherapistProbe(q1)) continue;
-      if (isGenericQuestion(q1)) continue;
-      if (isDuplicateQuestion(q1, previousQuestions)) continue;
-      if (isNearDuplicateQuestion(q1, previousQuestions)) continue;
-
-      return q1;
-    }
-    return '';
-  };
-
-  const modelPicked = pickCandidate(candidates);
-
-  // Fallback to parsed.question only if it passes filters
-  const single = typeof (parsed as any).question === 'string' ? (parsed as any).question.trim() : '';
-  const singleQ = single ? (single.endsWith('?') ? single : `${single}?`) : '';
-  const singleOk =
+  const singleQ = typeof (parsed as any).question === 'string' ? String((parsed as any).question).trim() : '';
+  const singleQOk =
     !!singleQ &&
     !isTherapistProbe(singleQ) &&
     !isGenericQuestion(singleQ) &&
     !isDuplicateQuestion(singleQ, previousQuestions) &&
-    !isNearDuplicateQuestion(singleQ, previousQuestions);
+    !isNearDuplicateText(singleQ, previousQuestions);
 
-  const finalRawQuestion =
-    (intent === 'LISTEN' || intent === 'CALM') && !modelPicked && !singleOk
+  const rawChosenQ =
+    (intent === 'LISTEN' || intent === 'CALM') && !qFromList && !singleQOk
       ? ''
-      : modelPicked || (singleOk ? singleQ : '');
+      : qFromList || (singleQOk ? coerceQuestionMark(singleQ) : '');
 
   const question = finalizeQuestion(
-    finalRawQuestion,
+    rawChosenQ,
     effectiveLayer,
     userText,
     previousQuestions,
@@ -1134,10 +1232,26 @@ function ensureAllLayers(
     lastQuestionType
   );
 
-  const encouragement =
-    typeof parsed.encouragement === 'string' && parsed.encouragement.trim()
-      ? parsed.encouragement
-      : fallbackEncouragement;
+  // --- Encouragement handling (candidate list + filter; optional; no poster lines) ---
+  const encCandidatesRaw = Array.isArray((parsed as any).encouragements) ? (parsed as any).encouragements : [];
+  const encCandidates: string[] = encCandidatesRaw
+    .filter((x: any) => typeof x === 'string')
+    .map((x: string) => x.trim())
+    .filter(Boolean);
+
+  const encFromList = pickBestEncCandidate(encCandidates, previousEncouragements);
+
+  const singleEnc = typeof (parsed as any).encouragement === 'string'
+    ? String((parsed as any).encouragement).trim()
+    : '';
+
+  const singleEncOk =
+    !!singleEnc &&
+    !isGenericLine(singleEnc) &&
+    !isDuplicateEnc(singleEnc, previousEncouragements) &&
+    !isNearDuplicateText(singleEnc, previousEncouragements);
+
+  const encouragement = encFromList || (singleEncOk ? singleEnc : fallbackEncouragement);
 
   return {
     acknowledgment: String(acknowledgment),
@@ -1212,9 +1326,7 @@ export async function POST(request: NextRequest) {
     // Grounding mode
     const { groundingMode, groundingTurns } = isInGroundingMode(sessionContext, sanitizedMessage);
 
-    // ------------------------------------------------------------------------
     // Phase 1: Analysis
-    // ------------------------------------------------------------------------
     const analysisMessages: AIMessage[] = [{ role: 'system', content: buildAnalysisPrompt() }];
 
     if (conversationHistory.length > 0) {
@@ -1239,9 +1351,7 @@ export async function POST(request: NextRequest) {
       if (parsedAnalysis) analysis = parsedAnalysis;
     }
 
-    // ------------------------------------------------------------------------
     // Phase 2: Response
-    // ------------------------------------------------------------------------
     const coreBeliefPatterns = [
       /i am not (built|made|cut out|good|smart|capable|worthy|enough|lovable|deserving)/i,
       /i'm not (built|made|cut out|good|smart|capable|worthy|enough|lovable|deserving)/i,
@@ -1287,10 +1397,19 @@ export async function POST(request: NextRequest) {
             ? 'EMOTION'
             : 'CORE_WOUND';
 
-    // Hydrate memory from history
+    // Hydrate memory from history (now includes ack/enc)
     const previousQuestions: string[] = [...(sessionContext?.previousQuestions ?? [])];
     const previousReframes: string[] = [...(sessionContext?.previousReframes ?? [])];
-    hydrateMemoryFromHistory(conversationHistory, previousQuestions, previousReframes);
+    const previousAcknowledgments: string[] = [...(sessionContext?.previousAcknowledgments ?? [])];
+    const previousEncouragements: string[] = [...(sessionContext?.previousEncouragements ?? [])];
+
+    hydrateMemoryFromHistory(
+      conversationHistory,
+      previousQuestions,
+      previousReframes,
+      previousAcknowledgments,
+      previousEncouragements
+    );
 
     const originalTrigger =
       sessionContext?.originalTrigger ??
@@ -1318,6 +1437,8 @@ export async function POST(request: NextRequest) {
           analysis,
           previousQuestions,
           previousReframes,
+          previousAcknowledgments,
+          previousEncouragements,
           originalTrigger,
           turnCount,
           userRevealedCoreBelief,
@@ -1338,17 +1459,19 @@ export async function POST(request: NextRequest) {
     let responseResult = await callAI(responseMessages);
     if (!responseResult?.content) responseResult = await callAI(responseMessages);
 
-    // If model failed completely, try a fresh regen once before falling back
+    // If model failed completely, try a regen pack once before falling back
     if (!responseResult?.content) {
-      const regenParsed = await regenerateFieldsFresh(
+      const regenParsed = await regeneratePackFresh({
         analysis,
-        sanitizedMessage,
-        previousQuestions,
-        previousReframes,
+        userText: sanitizedMessage,
         intent,
         groundingMode,
-        effectiveLayer
-      );
+        effectiveLayer,
+        previousQuestions,
+        previousReframes,
+        previousAcknowledgments,
+        previousEncouragements,
+      });
 
       const fallbackResponse = ensureAllLayers(
         regenParsed || {},
@@ -1357,6 +1480,8 @@ export async function POST(request: NextRequest) {
         sanitizedMessage,
         previousReframes,
         previousQuestions,
+        previousAcknowledgments,
+        previousEncouragements,
         frozenThoughtPattern,
         previousDistortion,
         groundingMode,
@@ -1384,6 +1509,7 @@ export async function POST(request: NextRequest) {
     }
 
     const parsed = parseAIJSON(responseResult.content);
+
     let completeResponse = ensureAllLayers(
       parsed || {},
       analysis,
@@ -1391,6 +1517,8 @@ export async function POST(request: NextRequest) {
       sanitizedMessage,
       previousReframes,
       previousQuestions,
+      previousAcknowledgments,
+      previousEncouragements,
       frozenThoughtPattern,
       previousDistortion,
       groundingMode,
@@ -1398,67 +1526,32 @@ export async function POST(request: NextRequest) {
       intent
     );
 
-    // If the question candidates got rejected and intent wants direction, regen QUESTIONS once
-    const currentQuestion = String((completeResponse as any).question || '').trim();
-    const shouldPreferQuestion =
-      intent === 'NEXT_STEP' || intent === 'CLARITY' || intent === 'MEANING';
+    // ✅ If generic/repetitive, regenerate a fresh pack once and re-ensure
+    const outAck = String((completeResponse as any).acknowledgment || '');
+    const outReframe = String((completeResponse as any).reframe || '');
+    const outEnc = String((completeResponse as any).encouragement || '');
+    const outQ = String((completeResponse as any).question || '');
 
-    if (shouldPreferQuestion && !groundingMode && !currentQuestion) {
-      const regenQ = await regenerateQuestionsFresh(
-        analysis,
-        sanitizedMessage,
-        previousQuestions,
-        previousReframes,
-        intent,
-        groundingMode,
-        effectiveLayer
-      );
-
-      if (regenQ) {
-        // merge regenerated questions into existing parsed output
-        const merged = {
-          ...(parsed || {}),
-          questions: (regenQ as any).questions,
-        };
-
-        completeResponse = ensureAllLayers(
-          merged,
-          analysis,
-          effectiveLayer,
-          sanitizedMessage,
-          previousReframes,
-          previousQuestions,
-          frozenThoughtPattern,
-          previousDistortion,
-          groundingMode,
-          lastQuestionType,
-          intent
-        );
-      }
-    }
-
-    // If repetitive/generic overall, regenerate fresh fields once (no canned pools)
     if (
       needsRegeneration(
-        {
-          acknowledgment: String((completeResponse as any).acknowledgment || ''),
-          reframe: String((completeResponse as any).reframe || ''),
-          encouragement: String((completeResponse as any).encouragement || ''),
-          question: String((completeResponse as any).question || ''),
-        },
+        { acknowledgment: outAck, reframe: outReframe, encouragement: outEnc, question: outQ },
         previousReframes,
-        previousQuestions
+        previousQuestions,
+        previousAcknowledgments,
+        previousEncouragements
       )
     ) {
-      const regenParsed = await regenerateFieldsFresh(
+      const regenParsed = await regeneratePackFresh({
         analysis,
-        sanitizedMessage,
-        previousQuestions,
-        previousReframes,
+        userText: sanitizedMessage,
         intent,
         groundingMode,
-        effectiveLayer
-      );
+        effectiveLayer,
+        previousQuestions,
+        previousReframes,
+        previousAcknowledgments,
+        previousEncouragements,
+      });
 
       if (regenParsed) {
         completeResponse = ensureAllLayers(
@@ -1468,6 +1561,8 @@ export async function POST(request: NextRequest) {
           sanitizedMessage,
           previousReframes,
           previousQuestions,
+          previousAcknowledgments,
+          previousEncouragements,
           frozenThoughtPattern,
           previousDistortion,
           groundingMode,

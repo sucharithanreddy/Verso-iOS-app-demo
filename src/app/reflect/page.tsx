@@ -21,6 +21,8 @@ import { DraggableBubble } from '@/components/DraggableBubble';
 import { ThoughtInput } from '@/components/ThoughtInput';
 import { Button } from '@/components/ui/button';
 
+type UserIntent = 'AUTO' | 'CALM' | 'CLARITY' | 'NEXT_STEP' | 'MEANING' | 'LISTEN';
+
 interface ReframeResponse {
   acknowledgment: string;
   // New Iceberg layer fields
@@ -89,7 +91,6 @@ export default function ReflectPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [groundingMode, setGroundingMode] = useState(false);
   const [groundingTurns, setGroundingTurns] = useState(0);
-  type UserIntent = 'AUTO' | 'CALM' | 'CLARITY' | 'NEXT_STEP' | 'MEANING' | 'LISTEN';
   const [userIntent, setUserIntent] = useState<UserIntent>('AUTO');
   const [lastQuestionType, setLastQuestionType] = useState<'choice' | 'open' | ''>('');
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -367,6 +368,7 @@ export default function ReflectPage() {
   };
 
   const handleReset = () => {
+    setUserIntent('AUTO');
     setMessages([]);
     setCurrentLayer('surface');
     setDiscoveredInsights({

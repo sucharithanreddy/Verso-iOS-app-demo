@@ -89,6 +89,8 @@ export default function ReflectPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [groundingMode, setGroundingMode] = useState(false);
   const [groundingTurns, setGroundingTurns] = useState(0);
+  type UserIntent = 'AUTO' | 'CALM' | 'CLARITY' | 'NEXT_STEP' | 'MEANING' | 'LISTEN';
+  const [userIntent, setUserIntent] = useState<UserIntent>('AUTO');
   const [lastQuestionType, setLastQuestionType] = useState<'choice' | 'open' | ''>('');
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');

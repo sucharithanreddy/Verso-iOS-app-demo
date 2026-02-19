@@ -405,7 +405,7 @@ export default function AssistPage() {
               Paste a message to get started
             </h3>
             <p className="text-sm text-slate-500 max-w-md mx-auto">
-              I&apos;ll tell you exactly how to respond — what to do, what to avoid, and a draft to start with.
+              I&apos;ll tell you exactly how to respond - what to do, what to avoid, and a draft to start with.
             </p>
           </div>
         )}

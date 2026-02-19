@@ -64,7 +64,7 @@ const doc = new Document({
     headers: {
       default: new Header({ children: [new Paragraph({
         alignment: AlignmentType.RIGHT,
-        children: [new TextRun({ text: 'Optimism Engine — Pitch Deck & Listing', color: colors.secondary, size: 18 })]
+        children: [new TextRun({ text: 'Optimism Engine - Pitch Deck & Listing', color: colors.secondary, size: 18 })]
       })] })
     },
     footers: {
@@ -98,7 +98,7 @@ const doc = new Document({
       new Paragraph({
         alignment: AlignmentType.CENTER,
         spacing: { before: 1200 },
-        children: [new TextRun({ text: 'Ready for Acquisition — $40,000 USD', size: 28, bold: true, color: colors.highlight })]
+        children: [new TextRun({ text: 'Ready for Acquisition - $40,000 USD', size: 28, bold: true, color: colors.highlight })]
       }),
       new Paragraph({
         alignment: AlignmentType.CENTER,
@@ -119,19 +119,19 @@ const doc = new Document({
       }),
       new Paragraph({
         spacing: { after: 200 },
-        children: [new TextRun({ text: 'The codebase represents over six months of intensive development, incorporating user feedback, iterative improvements, and enterprise-grade features like authentication, session persistence, grounding mode for crisis situations, and intelligent provider failover systems. This is not a prototype or MVP—it is a polished, market-ready product with professional UI/UX design, comprehensive error handling, and scalable architecture ready for immediate deployment.', size: 22 })]
+        children: [new TextRun({ text: 'The codebase represents over six months of intensive development, incorporating user feedback, iterative improvements, and enterprise-grade features like authentication, session persistence, grounding mode for crisis situations, and intelligent provider failover systems. This is not a prototype or MVP-it is a polished, market-ready product with professional UI/UX design, comprehensive error handling, and scalable architecture ready for immediate deployment.', size: 22 })]
       }),
 
       // ========== UNIQUE SELLING PROPOSITION ==========
       new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun('Unique Selling Proposition')] }),
       new Paragraph({
         spacing: { after: 200 },
-        children: [new TextRun({ text: 'The mental health app market is saturated with meditation timers, mood trackers, and journaling applications. The Optimism Engine differentiates itself through active cognitive intervention rather than passive wellness tracking. While competitors offer tools to monitor emotional states, this platform actively engages users in the therapeutic process of identifying, challenging, and restructuring negative thought patterns—the core mechanism of CBT that has decades of clinical validation.', size: 22 })]
+        children: [new TextRun({ text: 'The mental health app market is saturated with meditation timers, mood trackers, and journaling applications. The Optimism Engine differentiates itself through active cognitive intervention rather than passive wellness tracking. While competitors offer tools to monitor emotional states, this platform actively engages users in the therapeutic process of identifying, challenging, and restructuring negative thought patterns-the core mechanism of CBT that has decades of clinical validation.', size: 22 })]
       }),
       new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('Key Differentiators')] }),
       new Paragraph({
         numbering: { reference: 'bullet-features', level: 0 },
-        children: [new TextRun({ text: 'Progressive Layer Analysis: The AI doesn\'t just respond—it progressively guides users through surface thoughts to deeper emotional wounds using a sophisticated SURFACE → TRANSITION → EMOTION → CORE_WOUND progression model that mirrors professional therapeutic techniques.', size: 22 })]
+        children: [new TextRun({ text: 'Progressive Layer Analysis: The AI doesn\'t just respond-it progressively guides users through surface thoughts to deeper emotional wounds using a sophisticated SURFACE → TRANSITION → EMOTION → CORE_WOUND progression model that mirrors professional therapeutic techniques.', size: 22 })]
       }),
       new Paragraph({
         numbering: { reference: 'bullet-features', level: 0 },
@@ -148,19 +148,19 @@ const doc = new Document({
       new Paragraph({
         numbering: { reference: 'bullet-features', level: 0 },
         spacing: { after: 200 },
-        children: [new TextRun({ text: 'Enterprise-Ready Infrastructure: Complete with Clerk authentication, Prisma database integration, session persistence, and Vercel deployment optimization—this is production infrastructure, not a development prototype.', size: 22 })]
+        children: [new TextRun({ text: 'Enterprise-Ready Infrastructure: Complete with Clerk authentication, Prisma database integration, session persistence, and Vercel deployment optimization-this is production infrastructure, not a development prototype.', size: 22 })]
       }),
 
       // ========== PRODUCT FEATURES ==========
       new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun('Product Features Deep Dive')] }),
-      new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('Reflect Mode — Personal Cognitive Restructuring')] }),
+      new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('Reflect Mode - Personal Cognitive Restructuring')] }),
       new Paragraph({
         spacing: { after: 200 },
-        children: [new TextRun({ text: 'Reflect Mode is the flagship feature—a conversational AI companion that guides users through the CBT process of identifying and restructuring negative thought patterns. Unlike chatbots that provide generic advice, Reflect Mode conducts a sophisticated therapeutic dialogue that adapts to the user\'s emotional depth and readiness for change.', size: 22 })]
+        children: [new TextRun({ text: 'Reflect Mode is the flagship feature-a conversational AI companion that guides users through the CBT process of identifying and restructuring negative thought patterns. Unlike chatbots that provide generic advice, Reflect Mode conducts a sophisticated therapeutic dialogue that adapts to the user\'s emotional depth and readiness for change.', size: 22 })]
       }),
       new Paragraph({
         numbering: { reference: 'bullet-benefits', level: 0 },
-        children: [new TextRun({ text: 'Five-Layer Response Architecture: Every AI response is structured across five therapeutic layers—acknowledgment (validating the user\'s experience), thought pattern identification (labeling cognitive distortions), pattern note (connecting to broader themes), reframe (offering alternative perspectives), and forward-moving question (guiding continued exploration).', size: 22 })]
+        children: [new TextRun({ text: 'Five-Layer Response Architecture: Every AI response is structured across five therapeutic layers-acknowledgment (validating the user\'s experience), thought pattern identification (labeling cognitive distortions), pattern note (connecting to broader themes), reframe (offering alternative perspectives), and forward-moving question (guiding continued exploration).', size: 22 })]
       }),
       new Paragraph({
         numbering: { reference: 'bullet-benefits', level: 0 },
@@ -168,17 +168,17 @@ const doc = new Document({
       }),
       new Paragraph({
         numbering: { reference: 'bullet-benefits', level: 0 },
-        children: [new TextRun({ text: 'Conversation Memory: Sessions maintain context across messages, allowing the AI to build on previous insights and avoid repetitive questioning—creating a coherent therapeutic narrative.', size: 22 })]
+        children: [new TextRun({ text: 'Conversation Memory: Sessions maintain context across messages, allowing the AI to build on previous insights and avoid repetitive questioning-creating a coherent therapeutic narrative.', size: 22 })]
       }),
       new Paragraph({
         numbering: { reference: 'bullet-benefits', level: 0 },
         spacing: { after: 200 },
         children: [new TextRun({ text: 'Message Editing: Users can edit their messages and regenerate responses, supporting the iterative nature of therapeutic journaling and self-reflection.', size: 22 })]
       }),
-      new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('Assist Mode — Professional Support Tool')] }),
+      new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('Assist Mode - Professional Support Tool')] }),
       new Paragraph({
         spacing: { after: 200 },
-        children: [new TextRun({ text: 'Assist Mode transforms the platform into a real-time advisor for professionals who support others—therapists, coaches, HR professionals, managers, mediators, and crisis counselors. Users paste messages they\'ve received and receive instant analysis with actionable guidance.', size: 22 })]
+        children: [new TextRun({ text: 'Assist Mode transforms the platform into a real-time advisor for professionals who support others-therapists, coaches, HR professionals, managers, mediators, and crisis counselors. Users paste messages they\'ve received and receive instant analysis with actionable guidance.', size: 22 })]
       }),
       new Paragraph({
         numbering: { reference: 'bullet-benefits', level: 0 },
@@ -258,37 +258,37 @@ const doc = new Document({
           new TableRow({
             children: [
               new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Framework', bold: true, size: 22 })] })] }),
-              new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Next.js 15 with App Router — Server-side rendering, API routes, optimal SEO', size: 22 })] })] })
+              new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Next.js 15 with App Router - Server-side rendering, API routes, optimal SEO', size: 22 })] })] })
             ]
           }),
           new TableRow({
             children: [
               new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Language', bold: true, size: 22 })] })] }),
-              new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'TypeScript — Type safety, improved maintainability, better IDE support', size: 22 })] })] })
+              new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'TypeScript - Type safety, improved maintainability, better IDE support', size: 22 })] })] })
             ]
           }),
           new TableRow({
             children: [
               new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Authentication', bold: true, size: 22 })] })] }),
-              new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Clerk — Enterprise auth with social logins, session management, user profiles', size: 22 })] })] })
+              new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Clerk - Enterprise auth with social logins, session management, user profiles', size: 22 })] })] })
             ]
           }),
           new TableRow({
             children: [
               new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Database', bold: true, size: 22 })] })] }),
-              new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Prisma ORM with PostgreSQL — Type-safe queries, migrations, scalable data layer', size: 22 })] })] })
+              new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Prisma ORM with PostgreSQL - Type-safe queries, migrations, scalable data layer', size: 22 })] })] })
             ]
           }),
           new TableRow({
             children: [
               new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'UI Components', bold: true, size: 22 })] })] }),
-              new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'shadcn/ui + Tailwind CSS — Accessible, customizable, modern design system', size: 22 })] })] })
+              new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'shadcn/ui + Tailwind CSS - Accessible, customizable, modern design system', size: 22 })] })] })
             ]
           }),
           new TableRow({
             children: [
               new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Animations', bold: true, size: 22 })] })] }),
-              new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Framer Motion — Smooth, professional micro-interactions and transitions', size: 22 })] })] })
+              new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Framer Motion - Smooth, professional micro-interactions and transitions', size: 22 })] })] })
             ]
           }),
           new TableRow({
@@ -315,7 +315,7 @@ const doc = new Document({
       }),
       new Paragraph({
         numbering: { reference: 'bullet-tech', level: 0 },
-        children: [new TextRun({ text: 'Automatic Failover: If the primary provider is unavailable or rate-limited, the system automatically falls back to the next provider in the priority chain—ensuring uninterrupted service.', size: 22 })]
+        children: [new TextRun({ text: 'Automatic Failover: If the primary provider is unavailable or rate-limited, the system automatically falls back to the next provider in the priority chain-ensuring uninterrupted service.', size: 22 })]
       }),
       new Paragraph({
         numbering: { reference: 'bullet-tech', level: 0 },
@@ -365,7 +365,7 @@ const doc = new Document({
       new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('Listing Title')] }),
       new Paragraph({
         spacing: { after: 200 },
-        children: [new TextRun({ text: 'AI-Powered CBT Mental Health Platform — Production-Ready SaaS with Multi-Provider AI Infrastructure', bold: true, size: 24 })]
+        children: [new TextRun({ text: 'AI-Powered CBT Mental Health Platform - Production-Ready SaaS with Multi-Provider AI Infrastructure', bold: true, size: 24 })]
       }),
       new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('Listing Description')] }),
       new Paragraph({

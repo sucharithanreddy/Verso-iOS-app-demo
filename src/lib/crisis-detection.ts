@@ -129,7 +129,7 @@ I'm here to continue exploring what you're going through whenever you're ready, 
 - **Samaritans** (UK): **116 123**
 - **AASRA** (India): **+91-22-27546669**
 
-These are free, confidential, and available 24/7. You don't have to be in crisis to call — they're there to listen.
+These are free, confidential, and available 24/7. You don't have to be in crisis to call - they're there to listen.
 
 Now, let's continue exploring what's on your mind...`;
 }

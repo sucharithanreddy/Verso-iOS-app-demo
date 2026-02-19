@@ -923,7 +923,7 @@ export default function ReflectPage() {
                 </h2>
 
                 <p className="text-gray-600 text-center max-w-md mb-8 text-lg">
-                  Share a thought that&apos;s been weighing on you. Let&apos;s explore it together — surface, trigger, emotion, and the core belief beneath.
+                  Share a thought that&apos;s been weighing on you. Let&apos;s explore it together - surface, trigger, emotion, and the core belief beneath.
                 </p>
 
                 {!isSignedIn && (

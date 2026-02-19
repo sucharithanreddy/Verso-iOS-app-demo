@@ -2,7 +2,7 @@
 
 ## Subject Line Options:
 1. "Partnership Inquiry: AI CBT Platform with Deeper Conversational Depth"
-2. "Acquisition Opportunity: Differentiated Mental Health AI — Complementary to Wysa"
+2. "Acquisition Opportunity: Differentiated Mental Health AI - Complementary to Wysa"
 3. "Tech Collaboration: Emotion-Responsive CBT Engine (Not Another Chatbot)"
 
 ---
@@ -20,7 +20,7 @@ I hope this finds you well. I'm reaching out because I've built something that I
 
 **The Opportunity:**
 
-I've developed "The Optimism Engine" — an AI-powered CBT platform that achieves something most mental health chatbots struggle with: **deep, non-repetitive, emotionally intelligent conversations**.
+I've developed "The Optimism Engine" - an AI-powered CBT platform that achieves something most mental health chatbots struggle with: **deep, non-repetitive, emotionally intelligent conversations**.
 
 After studying Wysa, Woebot, and other leaders, I noticed a common user complaint: "It feels like a tool, not a conversation." Users want to feel heard, not managed.
 
@@ -39,7 +39,7 @@ After studying Wysa, Woebot, and other leaders, I noticed a common user complain
 
 *Optimism Engine:* "That must feel so heavy to carry around with you, like their words are leaving marks you can't quite wipe away. I wonder if you could start seeing these comments as background noise rather than truths about who you are..."
 
-This is the level of warmth and depth users expect — and rarely get — from AI therapy.
+This is the level of warmth and depth users expect - and rarely get - from AI therapy.
 
 **Technical Highlights:**
 - Production-ready Next.js 16 application
@@ -50,12 +50,12 @@ This is the level of warmth and depth users expect — and rarely get — from A
 
 **Why Wysa:**
 
-I've admired Wysa's commitment to evidence-based, accessible mental health support. Rather than competing, I believe this technology could accelerate your roadmap — whether through acquisition, licensing, or partnership.
+I've admired Wysa's commitment to evidence-based, accessible mental health support. Rather than competing, I believe this technology could accelerate your roadmap - whether through acquisition, licensing, or partnership.
 
 **What I'm Open To:**
-- **Acquisition** — Full IP transfer, codebase, documentation, 30-day support
-- **Licensing** — White-label for your platform
-- **Partnership** — Technology collaboration
+- **Acquisition** - Full IP transfer, codebase, documentation, 30-day support
+- **Licensing** - White-label for your platform
+- **Partnership** - Technology collaboration
 
 I'd welcome a 15-minute call to demo the platform and explore whether there's a fit. I'm happy to sign an NDA beforehand if preferred.
 
@@ -73,11 +73,11 @@ Best regards,
 
 ## Follow-Up (If No Response in 5 Days)
 
-**Subject:** Re: Partnership Inquiry — Quick Follow-Up
+**Subject:** Re: Partnership Inquiry - Quick Follow-Up
 
 Hi team,
 
-Just following up on my previous note about the Optimism Engine AI CBT platform. I understand you're busy — if mental health AI acquisition/partnership isn't a current priority, no worries at all.
+Just following up on my previous note about the Optimism Engine AI CBT platform. I understand you're busy - if mental health AI acquisition/partnership isn't a current priority, no worries at all.
 
 If it is, I'd still love to show you a 10-minute demo. The conversational depth is something that genuinely differentiates this from what's currently in market.
 
@@ -90,12 +90,12 @@ Best,
 
 ## Key Talking Points for Call
 
-1. **Differentiation** — Not another "coping skill dispenser"; actual conversational depth
-2. **User Feedback** — "Feels like talking to a therapist, not a chatbot"
-3. **IP Value** — Iceberg system + dynamic question engine are unique
-4. **Security** — Production-hardened, reduces liability
-5. **Flexibility** — Open to acquisition, licensing, or partnership
-6. **Timeline** — Ready for immediate handover
+1. **Differentiation** - Not another "coping skill dispenser"; actual conversational depth
+2. **User Feedback** - "Feels like talking to a therapist, not a chatbot"
+3. **IP Value** - Iceberg system + dynamic question engine are unique
+4. **Security** - Production-hardened, reduces liability
+5. **Flexibility** - Open to acquisition, licensing, or partnership
+6. **Timeline** - Ready for immediate handover
 
 ---
 

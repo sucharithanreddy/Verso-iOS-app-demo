@@ -1,6 +1,6 @@
 # 🧠 The Optimism Engine
 
-## Communication Intelligence Software — For Sale
+## Communication Intelligence Software - For Sale
 
 **Asking: $40,000** (Negotiable)
 
@@ -8,7 +8,7 @@
 
 ## What It Does
 
-People often hesitate before replying to emotional messages — from clients, partners, or team members.
+People often hesitate before replying to emotional messages - from clients, partners, or team members.
 
 The Optimism Engine analyzes the message and suggests a safe, appropriate response.
 
@@ -40,14 +40,14 @@ The product has not yet been commercialized. It was built first, then outreach b
 
 When a coach or mentor pastes a client message:
 
-1. **What to Do** — Clear action guidance
-2. **What to Avoid** — What not to say
-3. **Draft Reply** — Copy-paste response suggestion
-4. **What to Expect** — Predictive guidance
-5. **Emotional State** — Intensity + actionable insight
-6. **Risk Level** — Distress indicator
+1. **What to Do** - Clear action guidance
+2. **What to Avoid** - What not to say
+3. **Draft Reply** - Copy-paste response suggestion
+4. **What to Expect** - Predictive guidance
+5. **Emotional State** - Intensity + actionable insight
+6. **Risk Level** - Distress indicator
 
-The software reads emotionally complex messages and produces structured guidance: emotional intensity, likely interpretation, suggested response style, and a reply draft. The goal is not conversation — it is helping a human decide how to respond.
+The software reads emotionally complex messages and produces structured guidance: emotional intensity, likely interpretation, suggested response style, and a reply draft. The goal is not conversation - it is helping a human decide how to respond.
 
 ---
 
@@ -56,7 +56,7 @@ The software reads emotionally complex messages and produces structured guidance
 ### Full Platform
 - Production-ready Next.js application (TypeScript)
 - Two interfaces: `/reflect` and `/assist`
-- Works immediately — built-in AI SDK, no setup
+- Works immediately - built-in AI SDK, no setup
 - 10 optional AI providers supported
 - Authentication, database, and deployment configured
 
@@ -79,7 +79,7 @@ The software reads emotionally complex messages and produces structured guidance
 
 I built this to solve a real problem: helping people interpret emotional messages before responding.
 
-The product works. What it needs now is someone focused on distribution — coaches, communities, B2B licensing.
+The product works. What it needs now is someone focused on distribution - coaches, communities, B2B licensing.
 
 I'm moving to a different project and looking for a clean handover to someone who can take it to market.
 

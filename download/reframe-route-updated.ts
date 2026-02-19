@@ -187,7 +187,7 @@ function generateReframe(message: string, distortionName: string): string {
       "Reframe: 'I haven't experienced this success yet, but that's different from it being impossible. Progress often happens gradually.'",
     ],
     failure: [
-      "Instead of 'I'm a failure,' try: 'I experienced a setback. This doesn't define me—it's simply something that happened, not who I am.'",
+      "Instead of 'I'm a failure,' try: 'I experienced a setback. This doesn't define me-it's simply something that happened, not who I am.'",
       "Reframe: 'Failure is not the opposite of success; it's part of the path to success. Every successful person has a collection of failures.'",
     ],
     should: [
@@ -205,7 +205,7 @@ function generateReframe(message: string, distortionName: string): string {
   
   // Default reframe
   const defaultReframes = [
-    `This thought is just that—a thought. It's not a fact or a prediction. I can observe it without accepting it as truth.`,
+    `This thought is just that-a thought. It's not a fact or a prediction. I can observe it without accepting it as truth.`,
     `What if this thought is trying to protect me in some way? I can acknowledge its intention while choosing a more helpful perspective.`,
     `Instead of accepting this thought at face value, I can get curious: What would I tell a friend who had this thought?`,
     `This thought feels real, but feelings aren't facts. I have the power to examine it and choose a different narrative.`,
@@ -224,7 +224,7 @@ function determineLayer(conversationLength: number): 'surface' | 'trigger' | 'em
 function generateLayerInsight(layer: string, message: string): string {
   const insights = {
     surface: [
-      "This is the initial thought that caught your attention—the tip of the iceberg.",
+      "This is the initial thought that caught your attention-the tip of the iceberg.",
       "We're starting with what's most visible. There may be more to explore underneath.",
       "Surface thoughts often point to deeper patterns. Let's see what we discover.",
     ],
@@ -239,7 +239,7 @@ function generateLayerInsight(layer: string, message: string): string {
       "The emotion driving this thought is valid and worth exploring.",
     ],
     coreBelief: [
-      "We've reached a core belief—a fundamental assumption you may hold about yourself or the world.",
+      "We've reached a core belief-a fundamental assumption you may hold about yourself or the world.",
       "This deeper belief may have been with you for a long time. Awareness is the first step to change.",
       "Core beliefs often form early and operate unconsciously. Bringing this to light is powerful work.",
     ],

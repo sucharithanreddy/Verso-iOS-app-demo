@@ -333,21 +333,21 @@ function sanitizeReframeAllLayers(
     // ✅ NO TEMPLATE LEAKAGE: Use varied, contextual fallbacks
     if (effectiveLayer === 'CORE_WOUND') {
       if (isAbandonment) {
-        return `That feeling of being unloved is real — but it doesn't mean you're unlovable. One moment (or person) doesn't get to write your whole story.`;
+        return `That feeling of being unloved is real - but it doesn't mean you're unlovable. One moment (or person) doesn't get to write your whole story.`;
       }
       if (isFailure) {
         return `Not meeting expectations doesn't make you a disappointment. It makes you human.`;
       }
-      return `A painful event can shake your confidence — but it still doesn't get to decide your worth.`;
+      return `A painful event can shake your confidence - but it still doesn't get to decide your worth.`;
     }
     // Non-core wound fallbacks
     if (isAbandonment) {
-      return `The fear of being alone is real — but it's speaking louder than the facts right now.`;
+      return `The fear of being alone is real - but it's speaking louder than the facts right now.`;
     }
     if (isFailure) {
-      return `That interpretation makes sense emotionally — but it's still an interpretation, not a verdict.`;
+      return `That interpretation makes sense emotionally - but it's still an interpretation, not a verdict.`;
     }
-    return `The feeling is real — but the conclusion might be harsher than the facts support.`;
+    return `The feeling is real - but the conclusion might be harsher than the facts support.`;
   }
 
   const cur = normalizeForCompare(r);
@@ -357,9 +357,9 @@ function sanitizeReframeAllLayers(
   const interpretationPattern = /trigger doesn't automatically mean|another possibility.*trigger/i;
   if (interpretationPattern.test(r)) {
     if (effectiveLayer === 'CORE_WOUND') {
-      return `It feels true right now — but feelings under pressure often exaggerate the story.`;
+      return `It feels true right now - but feelings under pressure often exaggerate the story.`;
     }
-    return `That interpretation makes sense emotionally — but it's still an interpretation, not a verdict.`;
+    return `That interpretation makes sense emotionally - but it's still an interpretation, not a verdict.`;
   }
 
   // Block repeated "What if..." openings - use context-aware fallback
@@ -367,7 +367,7 @@ function sanitizeReframeAllLayers(
   const alreadyUsedWhatIf = prev.some(x => x.startsWith('what if'));
   if (startsWhatIf && alreadyUsedWhatIf) {
     if (isAbandonment || effectiveLayer === 'CORE_WOUND') {
-      return `That feeling of being unloved is real — but it doesn't mean you're unlovable. One moment (or person) doesn't get to write your whole story.`;
+      return `That feeling of being unloved is real - but it doesn't mean you're unlovable. One moment (or person) doesn't get to write your whole story.`;
     }
     return `The feeling is real, but the conclusion might be harsher than the facts support.`;
   }
@@ -383,7 +383,7 @@ function sanitizeReframeAllLayers(
   if (effectiveLayer === 'CORE_WOUND') {
     const lower = r.toLowerCase();
     if (lower.includes('chapter') || lower.includes('ending') || lower.includes('just a story')) {
-      return `What happened matters — and it can hurt — but it still doesn't define who you are. A mistake or setback is information, not identity.`;
+      return `What happened matters - and it can hurt - but it still doesn't define who you are. A mistake or setback is information, not identity.`;
     }
 
     const bannedPhrases = [
@@ -391,7 +391,7 @@ function sanitizeReframeAllLayers(
       'black and white photo', 'spectrum of experiences', 'math problem', 'fixed point on a scale',
     ];
     if (bannedPhrases.some(b => lower.includes(b))) {
-      return `This belief is your brain trying to protect you from getting hurt again — but it's not a verdict. You can be shaken and still be capable.`;
+      return `This belief is your brain trying to protect you from getting hurt again - but it's not a verdict. You can be shaken and still be capable.`;
     }
   }
 
@@ -627,15 +627,15 @@ function ensureAllLayers(
   // ✅ ACKNOWLEDGMENT VARIETY: Don't overuse "that lands" - ALL include snippet for uniqueness
   const acknowledgmentOptions = effectiveLayer === 'CORE_WOUND'
     ? [
-        `Ouch. "${snippet}" — that's a heavy thing to carry.`,
+        `Ouch. "${snippet}" - that's a heavy thing to carry.`,
         `"${snippet}" cuts deep. I'm sitting with you in that.`,
-        `That's a painful place to be — "${snippet}" — and you're naming it.`,
+        `That's a painful place to be - "${snippet}" - and you're naming it.`,
       ]
     : [
-        `Yeah... "${snippet}" — that lands.`,
-        `"${snippet}" — I hear you.`,
-        `Mmm. "${snippet}" — let's sit with that.`,
-        `"${snippet}" — thank you for sharing that.`,
+        `Yeah... "${snippet}" - that lands.`,
+        `"${snippet}" - I hear you.`,
+        `Mmm. "${snippet}" - let's sit with that.`,
+        `"${snippet}" - thank you for sharing that.`,
       ];
   const fallbackAcknowledgment = acknowledgmentOptions[Math.floor(Math.random() * acknowledgmentOptions.length)];
 
@@ -651,13 +651,13 @@ function ensureAllLayers(
     : effectiveLayer === 'CORE_WOUND'
       ? [
           `That belief shows up fast when the pressure hits.`,
-          `This is where the wound lives — underneath all the effort.`,
+          `This is where the wound lives - underneath all the effort.`,
           `There's a deep fear driving this.`,
         ]
       : isRepeatedEffort
         ? [
             `This sounds less like distortion and more like exhaustion.`,
-            `That's not just a thought pattern — that's fatigue talking.`,
+            `That's not just a thought pattern - that's fatigue talking.`,
             `When effort keeps hitting walls, the mind looks for a reason. Even a harsh one.`,
             `Repeated effort + no results = a brain searching for meaning. Even painful meaning.`,
           ]
@@ -680,23 +680,23 @@ function ensureAllLayers(
   // ✅ REFRACT VARIETY: Different angles for different emotional states
   const fallbackReframeOptions = effectiveLayer === 'CORE_WOUND'
     ? isAbandonment
-      ? [`That feeling of being unloved is real — but it doesn't mean you're unlovable.`]
+      ? [`That feeling of being unloved is real - but it doesn't mean you're unlovable.`]
       : isFailure
         ? [`Not meeting expectations doesn't make you a disappointment. It makes you human.`]
         : [
-            `A painful moment can shake your confidence — but it still doesn't get to decide your worth.`,
-            `It feels true right now — but feelings under pressure often exaggerate the story.`,
+            `A painful moment can shake your confidence - but it still doesn't get to decide your worth.`,
+            `It feels true right now - but feelings under pressure often exaggerate the story.`,
           ]
     : isRepeatedEffort
       ? [
           `Effort without results doesn't mean no effort was worth anything. Timing and luck are real factors.`,
-          `You've been carrying a lot. Maybe the issue isn't you — maybe it's a system that hasn't caught up yet.`,
+          `You've been carrying a lot. Maybe the issue isn't you - maybe it's a system that hasn't caught up yet.`,
           `Sometimes the right door hasn't opened yet. That doesn't mean you're knocking wrong.`,
           `The outcome isn't here yet. That's not the same as impossible.`,
         ]
       : [
-          `The feeling is real — but the conclusion might be harsher than the facts support.`,
-          `That interpretation makes sense emotionally — but it's still an interpretation, not a verdict.`,
+          `The feeling is real - but the conclusion might be harsher than the facts support.`,
+          `That interpretation makes sense emotionally - but it's still an interpretation, not a verdict.`,
         ];
   const fallbackReframe = groundingMode
     ? `Sometimes a small moment of comfort is exactly what you need.`
@@ -708,7 +708,7 @@ function ensureAllLayers(
     : effectiveLayer === 'CORE_WOUND'
       ? ['']  // Silence in core wound
       : [
-          `What part of this feels most personal — what happened, or what it *seems to say* about you?`,
+          `What part of this feels most personal - what happened, or what it *seems to say* about you?`,
           `What's the hardest part to sit with right now?`,
           `What does this bring up for you?`,
           `Where does this hit you the hardest?`,
@@ -736,7 +736,7 @@ function ensureAllLayers(
         `Staying curious about this is its own form of strength.`,
         `It matters that you're showing up for yourself here.`,
         `Just talking about this is a step.`,
-        `Being with this feeling instead of running from it — that's something.`,
+        `Being with this feeling instead of running from it - that's something.`,
       ];
   const fallbackEncouragement = groundingMode
     ? `Taking care of yourself is valid.`
@@ -792,7 +792,7 @@ function ensureAllLayers(
 
   // Hard block exact reframe repetition
   if (isDuplicateReframe(reframe, previousReframes)) {
-    reframe = `Let's slow this down. The feeling is intense — but intensity doesn't equal truth.`;
+    reframe = `Let's slow this down. The feeling is intense - but intensity doesn't equal truth.`;
   }
 
   // Question handling

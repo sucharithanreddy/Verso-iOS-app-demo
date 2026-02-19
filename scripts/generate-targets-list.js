@@ -61,7 +61,7 @@ const doc = new Document({
     headers: {
       default: new Header({ children: [new Paragraph({
         alignment: AlignmentType.RIGHT,
-        children: [new TextRun({ text: 'Optimism Engine — Acquisition Targets List', color: colors.secondary, size: 18 })]
+        children: [new TextRun({ text: 'Optimism Engine - Acquisition Targets List', color: colors.secondary, size: 18 })]
       })] })
     },
     footers: {
@@ -85,7 +85,7 @@ const doc = new Document({
       new Paragraph({
         alignment: AlignmentType.CENTER,
         spacing: { before: 200 },
-        children: [new TextRun({ text: 'The Optimism Engine — Strategic Buyer Outreach', size: 28, color: colors.secondary })]
+        children: [new TextRun({ text: 'The Optimism Engine - Strategic Buyer Outreach', size: 28, color: colors.secondary })]
       }),
       new Paragraph({
         alignment: AlignmentType.CENTER,
@@ -108,7 +108,7 @@ const doc = new Document({
       new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('Outreach Strategy Recommendations')] }),
       new Paragraph({
         numbering: { reference: 'bullet-outreach', level: 0 },
-        children: [new TextRun({ text: 'Start with HIGH priority targets — these companies have demonstrated acquisition appetite, relevant product portfolios, and immediate strategic value.', size: 22 })]
+        children: [new TextRun({ text: 'Start with HIGH priority targets - these companies have demonstrated acquisition appetite, relevant product portfolios, and immediate strategic value.', size: 22 })]
       }),
       new Paragraph({
         numbering: { reference: 'bullet-outreach', level: 0 },
@@ -120,7 +120,7 @@ const doc = new Document({
       }),
       new Paragraph({
         numbering: { reference: 'bullet-outreach', level: 0 },
-        children: [new TextRun({ text: 'Marketplaces like Acquire.com and Flippa should complement direct outreach, not replace it — you will get better terms dealing directly.', size: 22 })]
+        children: [new TextRun({ text: 'Marketplaces like Acquire.com and Flippa should complement direct outreach, not replace it - you will get better terms dealing directly.', size: 22 })]
       }),
       new Paragraph({
         numbering: { reference: 'bullet-outreach', level: 0 },
@@ -226,7 +226,7 @@ const doc = new Document({
             children: [
               new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Modern Health', size: 20 })] })] }),
               new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Mental health platform', size: 20 })] })] }),
-              new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Global employer focus; needs AI self-help; went through layoffs—acquisition opportunity', size: 20 })] })] }),
+              new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Global employer focus; needs AI self-help; went through layoffs-acquisition opportunity', size: 20 })] })] }),
               new TableCell({ borders: cellBorders, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'MEDIUM', bold: true, size: 20, color: priorityColors.Medium })] })] })
             ]
           }),
@@ -441,7 +441,7 @@ const doc = new Document({
       new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun('Category 4: Health-Tech Startups & Acqui-hires')] }),
       new Paragraph({
         spacing: { after: 200 },
-        children: [new TextRun({ text: 'These companies may not be direct competitors but have strategic reasons to add mental health capabilities. Some may be interested in acqui-hires—buying the technology and team together. Focus on companies that have raised Series A+ and are actively expanding product lines.', size: 22 })]
+        children: [new TextRun({ text: 'These companies may not be direct competitors but have strategic reasons to add mental health capabilities. Some may be interested in acqui-hires-buying the technology and team together. Focus on companies that have raised Series A+ and are actively expanding product lines.', size: 22 })]
       }),
 
       // Health Tech Table
@@ -490,7 +490,7 @@ const doc = new Document({
             children: [
               new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Cerebral', size: 20 })] })] }),
               new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Online psychiatry', size: 20 })] })] }),
-              new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Mental health focus; had regulatory issues—needs better tech; risk but upside', size: 20 })] })] }),
+              new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: 'Mental health focus; had regulatory issues-needs better tech; risk but upside', size: 20 })] })] }),
               new TableCell({ borders: cellBorders, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'MEDIUM', bold: true, size: 20, color: priorityColors.Medium })] })] })
             ]
           }),
@@ -705,7 +705,7 @@ const doc = new Document({
       new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun('Outreach Email Template')] }),
       new Paragraph({
         spacing: { after: 100 },
-        children: [new TextRun({ text: 'Subject: Acquisition Opportunity — AI-Powered CBT Platform (Production-Ready)', bold: true, size: 22 })]
+        children: [new TextRun({ text: 'Subject: Acquisition Opportunity - AI-Powered CBT Platform (Production-Ready)', bold: true, size: 22 })]
       }),
       new Paragraph({
         spacing: { after: 200 },

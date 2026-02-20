@@ -19,13 +19,6 @@ jobs:
       - name: Prisma generate
         run: npx prisma generate
 
-      # Optional: make sure schema.prisma matches Neon (only if you want truth-from-db)
-      # If you already updated schema.prisma intentionally, you can remove this step.
-      # - name: Pull DB schema into Prisma schema
-      #   env:
-      #     DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      #   run: npx prisma db pull
-
       - name: Create baseline migration folder
         run: |
           mkdir -p prisma/migrations/0001_baseline
@@ -36,7 +29,8 @@ jobs:
 
       - name: Mark baseline as applied in DB
         env:
-          DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
         run: npx prisma migrate resolve --applied 0001_baseline
 
       - name: Commit baseline migration
@@ -44,5 +38,5 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add prisma/migrations prisma/schema.prisma
-          git commit -m "Baseline Prisma migrations on Neon"
+          git commit -m "Baseline Prisma migrations on Neon" || echo "No changes to commit"
           git push

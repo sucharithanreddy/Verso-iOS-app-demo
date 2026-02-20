@@ -8,6 +8,9 @@ on:
         required: true
         default: "add_structured_engine_fields"
 
+permissions:
+  contents: write
+
 jobs:
   gen_migration:
     runs-on: ubuntu-latest

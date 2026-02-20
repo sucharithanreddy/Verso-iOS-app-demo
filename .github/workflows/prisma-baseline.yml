@@ -14,7 +14,7 @@ jobs:
           node-version: 20
 
       - name: Install
-        run: npm ci
+        run: npm install
 
       - name: Prisma generate
         run: npx prisma generate

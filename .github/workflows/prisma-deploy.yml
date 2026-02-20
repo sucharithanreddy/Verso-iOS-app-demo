@@ -27,8 +27,8 @@ jobs:
       - name: Prisma generate
         run: npx prisma generate
 
-      - name: Prisma migrate deploy
-        run: npx prisma migrate deploy
+      - name: Resolve failed migration
         env:
-          DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
-          DIRECT_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+            DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+            DIRECT_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+        run: npx prisma migrate resolve --rolled-back 20260220134851_add_structured_engine_fields

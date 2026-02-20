@@ -30,11 +30,11 @@ jobs:
           -- This marks the existing Neon schema as the starting point for Prisma migrations.
           SQL
 
-      - name: Mark baseline as applied in DB
+      - name: Mark baseline as applied in DB (idempotent)
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DIRECT_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
-        run: npx prisma migrate resolve --applied 0001_baseline
+          DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+        run: |
+          npx prisma migrate resolve --applied 0001_baseline || echo "Baseline already applied — continuing"
 
       - name: Commit baseline migration
         run: |

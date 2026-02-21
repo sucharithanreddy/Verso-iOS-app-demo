@@ -940,7 +940,7 @@ async function regeneratePackFresh(args: {
 
   const regenPrompt = `
 You are writing as a premium CBT-based product: a Cognitive Reflection Engine.
-Sound human, specific, and non-templated.
+Sound human, specific, and non-templated. DO NOT output prefixes like "Candidate #", "Option A/B", numbering, or bullet markers inside any string fields.
 
 User message: "${userText}"
 
@@ -982,14 +982,14 @@ Hard rules:
 
 JSON:
 {
-  "acknowledgments": ["...","..."],
-  "acknowledgment": "pick your best one here too",
+  "acknowledgments": ["<plain sentence>", "<plain sentence>"],
+  "acknowledgment": "<one plain sentence from acknowledgments>",
   "thoughtPattern": "",
   "patternNote": "",
-  "reframe": "...",
-  "questions": ["...","...","..."],
-  "encouragements": ["...","..."],
-  "encouragement": ""
+  "reframe": "<plain paragraph>",
+  "questions": ["<plain question?>", "<plain question?>"],
+  "encouragements": ["<plain sentence>", "<plain sentence>"],
+  "encouragement": "<one plain sentence from encouragements or empty>"
 }
 `.trim();
 

@@ -1247,9 +1247,9 @@ ${askQuestionRule}
 - Avoid generic templates (banned: "hardest part", "heaviest", "most personal", "story your mind keeps replaying", "tell me more").
 - Avoid therapy-probing (no childhood/timeline/body-location interrogation).
 - If user is stabilizing / saying thanks / feeling better, return "questions": [].
-- Encouragement optional; if present, must not be motivational poster language.`;
+- Encouragement optional; if present, must not be motivational poster language.
 - ONLY reference core wounds if effectiveLayer is CORE_WOUND.
-- Do NOT mention "CORE WOUND" in patternNote unless thoughtPattern is exactly "Core Belief".
+- Do NOT mention "CORE WOUND" in patternNote unless thoughtPattern is exactly "Core Belief".;`
 }
 
 // ============================================================================

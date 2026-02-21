@@ -278,6 +278,14 @@ function normalizeForCompare(s: string): string {
   return (s || '').toLowerCase().replace(/\s+/g, ' ').trim();
 }
 
+function stripCandidatePrefixes(s: string): string {
+  return (s || '')
+    .replace(/^\s*(candidate\s*#?\d+[:\-]?\s*)/i, '')
+    .replace(/^\s*(option\s*[a-z]\s*[:\-]?\s*)/i, '')
+    .replace(/^\s*\d+[\).\-\:]\s*/, '')
+    .trim();
+}
+
 // ============================================================================
 // Hard Block Exact Repetition (questions + reframes + pattern notes + ack/enc)
 // ============================================================================

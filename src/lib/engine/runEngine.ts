@@ -854,6 +854,8 @@ function isGenericLine(s: string): boolean {
     'i understand',
     'that sounds',
     'it seems like',
+    'this matters to you',
+    'just means you care',
   ];
 
   return generic.some(g => t.includes(g));
@@ -872,6 +874,9 @@ function isGenericQuestion(q: string): boolean {
     'tell me more',
     'explore more deeply',
     'where in your body',
+    'mind keeps playing',
+    'scenario your mind',
+    'keeps replaying',
   ];
 
   if (s.length < 14) return true;

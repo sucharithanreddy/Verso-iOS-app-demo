@@ -1,231 +1,305 @@
-# 🧠 The Optimism Engine
+# The Optimism Engine
 
-> **AI-Powered Cognitive Reframing Platform** | Production-Ready SaaS
+AI-Powered Cognitive Reflection Engine (Production-Ready SaaS)
 
-A beautifully designed mental wellness application that uses AI and Cognitive Behavioral Therapy (CBT) techniques to help users identify, explore, and reframe negative thought patterns through progressive "Iceberg" conversations.
+A full-stack SaaS application and structured cognitive engine that guides users through AI-powered CBT-style reflection conversations using deterministic state routing and multi-provider AI infrastructure.
 
----
+🎯 What This Is
 
-## 🎯 What This Is
+The Optimism Engine is a production-ready cognitive reframing platform built on a structured “reflection engine” architecture.
 
-The Optimism Engine is a **full-stack SaaS application** that guides users through cognitive restructuring conversations. Users share negative thoughts, and the AI therapist helps them:
+Users share a negative thought. The system:
 
-1. **Identify cognitive distortions** (10 types: Catastrophizing, All-or-Nothing Thinking, Mind Reading, etc.)
-2. **Explore the "Iceberg"** - progressive layers from Surface → Trigger → Emotion → Core Belief
-3. **Reframe thoughts** with personalized, empathetic responses
-4. **Track progress** across multiple sessions
+Analyzes underlying interpretation, fear, and emotional need
 
----
+Routes the response through a deterministic cognitive state machine
 
-## 💎 Key Features
+Applies CBT-informed restructuring logic
 
-### 🤖 Multi-Provider AI Integration
-- **10 AI providers** supported: Z.AI SDK (Built-in), Mistral, DeepSeek, Z.AI (GLM-4), Gemini, OpenAI, Anthropic, Groq, Together AI, OpenRouter
-- Automatic failover between providers
-- **Works out of the box** - Z.AI SDK requires no API key setup
-- Intelligent fallback system ensures responses always complete
+Prevents repetition and templated output
 
-### 🧠 CBT Engine
-- 13 cognitive distortion types with pattern detection
-- 9 emotion categories with 4 intensity levels
-- Progressive 4-layer Iceberg system (Surface → Trigger → Emotion → Core Belief)
-- **Varied response labels** - 3 variations per distortion type to prevent repetition
-- **Rotating encouragement emojis** - 8 different options for natural feel
-- Cross-session personalization
+Returns structured JSON suitable for UI or API integrations
 
-### 👤 User Features
-- Clerk authentication (Google, Email)
-- Session history with full conversation logs
-- Progress tracking and insights
-- Export conversations
-- Responsive design (mobile-friendly)
+This is not just a prompt wrapper.
+It is a layered engine with:
 
-### 🎨 Premium UI/UX
-- Framer Motion animations
-- Iceberg visualization
-- Clean, therapeutic aesthetic
-- Dark/light mode ready
+Deterministic intervention routing
 
----
+Anti-duplication safeguards
 
-## 🛠 Tech Stack
+Regeneration logic
 
-| Layer | Technology |
-|-------|------------|
-| **Frontend** | Next.js 16, React 19, TypeScript |
-| **Styling** | Tailwind CSS, Framer Motion |
-| **Backend** | Next.js API Routes |
-| **Database** | PostgreSQL (Neon) + Prisma ORM |
-| **Auth** | Clerk |
-| **AI** | Mistral, OpenAI, Anthropic, Groq, Gemini |
-| **Deploy** | Vercel |
+Multi-provider AI failover
 
----
+Structured output contract
 
-## 📁 Project Structure
+🧠 Core Engine Architecture
 
-```
-optimism-engine/
-├── src/
-│   ├── app/
-│   │   ├── api/              # API routes (reframe, sessions, messages)
-│   │   ├── components/       # React components
-│   │   └── page.tsx          # Main application
-│   ├── lib/
-│   │   ├── ai-service.ts     # Multi-provider AI integration
-│   │   └── db.ts             # Prisma client
-│   └── components/ui/        # shadcn/ui components
-├── prisma/
-│   └── schema.prisma         # Database schema
-├── .env.example              # Environment template
-└── README.md
-```
+At the center is:
 
----
+runEngine()
+Engine Flow
+User Input
+   ↓
+Crisis Detection Layer
+   ↓
+Phase 1: Emotional Analysis (AI)
+   ↓
+Deterministic State Router
+   ↓
+Phase 2: Structured Response Generation
+   ↓
+Anti-duplicate & Regeneration Layer
+   ↓
+Output Sanitization
+   ↓
+Structured JSON Response
+Cognitive States
 
-## 🚀 Quick Start
+The engine dynamically routes responses into:
 
-### Prerequisites
-- Node.js 18+
-- PostgreSQL database (Neon, Supabase, etc.)
-- Clerk account
-- AI provider API key (Mistral recommended - free tier available)
+REGULATE (grounding / stabilization)
 
-### Installation
+CLARIFY (facts vs story separation)
 
-```bash
-# Clone the repository
-git clone https://github.com/your-username/optimism-engine.git
+MAP (interpretation → fear → need)
 
-# Install dependencies
-bun install
+RESTRUCTURE (CBT distortion correction)
 
-# Set up environment variables
-cp .env.example .env.local
+PLAN (tiny-step action conversion)
 
-# Run database migrations
-bunx prisma db push
+PRESENCE (reflect-only listening)
 
-# Start development server
-bun run dev
-```
+Routing is rule-based, not random.
 
-### Environment Variables
+🧊 Iceberg Reflection Model
 
-```env
-# Database
-DATABASE_URL="postgresql://..."
-DIRECT_URL="postgresql://..."
+Progressive conversational layers:
 
-# Clerk Auth
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_..."
-CLERK_SECRET_KEY="sk_..."
+Surface
 
-# AI Provider (choose one or more)
-MISTRAL_API_KEY="..."      # Recommended - free tier
-OPENAI_API_KEY="..."
-ANTHROPIC_API_KEY="..."
-GROQ_API_KEY="..."
-```
+Trigger
 
----
+Emotion
 
-## 📊 Database Schema
+Core Belief
 
-```prisma
-model User {
-  id        String     @id
-  sessions  Session[]
-  messages  Message[]
+Layer progression is tracked per session and influences response style.
+
+🔁 Anti-Template Safeguards
+
+The engine includes:
+
+Exact duplicate blocking
+
+Near-duplicate detection (Jaccard similarity)
+
+Generic phrase detection
+
+Regeneration pass if output is low-quality
+
+Candidate filtering and selection
+
+Prefix sanitization (removes “Candidate #1”, etc.)
+
+Question suppression in stabilization states
+
+This prevents repetitive or generic AI output across sessions.
+
+🤖 Multi-Provider AI Layer
+
+Supported providers:
+
+OpenAI
+
+Anthropic
+
+Mistral
+
+Groq
+
+Gemini
+
+DeepSeek
+
+Together AI
+
+OpenRouter
+
+Z.AI SDK (default fallback)
+
+Features:
+
+Automatic failover
+
+Structured JSON enforcement
+
+Provider metadata returned in _meta
+
+No hardcoded API dependencies
+
+👤 User Features
+
+Clerk authentication (Google / Email)
+
+Session history
+
+Persistent message storage
+
+Progress scoring
+
+Iceberg layer tracking
+
+Mobile-responsive UI
+
+Exportable conversation logs
+
+🛠 Tech Stack
+Layer	Technology
+Frontend	Next.js 16, React 19, TypeScript
+Styling	Tailwind CSS, Framer Motion
+Backend	Next.js Route Handlers
+Database	PostgreSQL (Neon) + Prisma
+Auth	Clerk
+Deploy	Vercel
+📡 API Contract
+POST /api/engine
+
+Request:
+
+{
+  "text": "I feel nervous about my interview",
+  "session_context": {
+    "userIntent": "AUTO"
+  }
 }
 
-model Session {
-  id          String     @id
-  title       String?
-  currentLayer String   @default("surface")
-  coreBelief  String?
-  isCompleted Boolean    @default(false)
-  messages    Message[]
-  createdAt   DateTime
+Response:
+
+{
+  "acknowledgment": "...",
+  "thoughtPattern": "Catastrophizing",
+  "patternNote": "...",
+  "reframe": "...",
+  "question": "...",
+  "encouragement": "...",
+  "icebergLayer": "surface",
+  "_meta": {
+    "state": "PLAN",
+    "intervention": "TINY_PLAN",
+    "confidence": 0.78
+  }
 }
 
-model Message {
-  id                    String   @id
-  role                  String   // "user" or "assistant"
-  content               String
-  distortionType        String?
-  distortionExplanation String?
-  reframe               String?
-  probingQuestion       String?
-  encouragement         String?
-  icebergLayer          String?
-  layerInsight          String?
-  session               Session  @relation(...)
-  createdAt             DateTime
-}
-```
+This endpoint is designed for:
 
----
+SaaS integration
 
-## 💰 Monetization Opportunities
+Mobile app embedding
 
-### Already Built
-- ✅ User authentication system
-- ✅ Session tracking
-- ✅ AI conversation engine
+White-label use
 
-### Easy Additions (Weekend Work)
-| Feature | Revenue Potential |
-|---------|-------------------|
-| Premium subscription ($9.99/mo) | $10K-50K ARR |
-| Therapist dashboard (B2B) | $50K-200K ARR |
-| Corporate wellness packages | $100K+ ARR |
-| White-label licensing | $20K-100K/year |
+API resale
 
-### Market Context
-- **BetterHelp**: Acquired for ~$250M
-- **Calm**: Valued at $2B
-- **Woebot**: Raised $100M+
-- **Wysa**: Raised $40M+
+🗄 Database Schema
 
----
+Core entities:
 
-## 🔒 Security & Privacy
+User
 
-- Secure authentication via Clerk
-- Environment-based API key storage
-- No hardcoded secrets
-- Database encryption (Neon)
-- Ready for HIPAA compliance (minor additions needed)
+Session
 
----
+Message
 
-## 📈 What's Included in Sale
+Messages store:
 
-- ✅ Complete source code (TypeScript/Next.js)
-- ✅ Database schema and migrations
-- ✅ 7 AI provider integrations
-- ✅ CBT engine with 10 distortions + 9 emotions
-- ✅ UI components (shadcn/ui)
-- ✅ Documentation
-- ✅ Deployment configuration (Vercel)
-- ✅ Domain transfer (if applicable)
-- ✅ Post-sale support (negotiable)
+Distortion type
 
----
+Reframe
 
-## 📞 Contact
+Probing question
 
-For acquisition inquiries, reach out via:
-- **Acquire.com listing**: [Link]
-- **Email**: [Your email]
+Encouragement
 
----
+Iceberg layer
 
-## 📄 License
+Structured metadata
 
-Proprietary - All rights reserved. For acquisition/licensing inquiries, contact the owner.
+Designed for longitudinal tracking.
 
----
+🔒 Security & Data Handling
 
-*Built with ❤️ using Next.js, AI, and CBT principles.*
+Environment-based secret management
+
+No hardcoded API keys
+
+Auth via Clerk
+
+Hosted PostgreSQL (Neon)
+
+Structured server-side validation
+
+Clear separation between public UI and engine route
+
+📦 What’s Included in Sale
+
+Complete TypeScript source code
+
+Unified runEngine() cognitive engine
+
+Multi-provider AI abstraction layer
+
+Anti-duplicate / regeneration safeguards
+
+Database schema + migrations
+
+Deployment configuration (Vercel)
+
+Documentation
+
+Optional post-sale support
+
+💼 Ideal Buyers
+
+Mental wellness SaaS founders
+
+Journaling or productivity apps adding AI reflection
+
+Corporate wellness startups
+
+AI infra builders wanting a structured cognitive engine
+
+Founders seeking a deploy-ready AI SaaS base
+
+💰 Monetization Pathways
+
+Potential expansions:
+
+Subscription model
+
+Corporate wellness licensing
+
+Therapist dashboards
+
+White-label licensing
+
+API-based B2B licensing
+
+Revenue strategy is not embedded — the engine is infrastructure-ready.
+
+🚀 Deployment
+
+Clone repository
+
+Configure environment variables
+
+Run Prisma migrations
+
+Deploy to Vercel
+
+Designed for production, not prototype demos.
+
+📄 License
+
+Proprietary.
+Available for acquisition or licensing.

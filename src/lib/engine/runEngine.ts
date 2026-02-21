@@ -1208,23 +1208,22 @@ Return ONLY valid JSON:
 
 {
   "acknowledgments": [
-    "Candidate #1: specific, grounded, not cliché",
-    "Candidate #2: different angle, also specific"
+    "Option A (specific, grounded, no clichés)",
+    "Option B (different angle, still specific)"
   ],
-  "acknowledgment": "pick your best one here too",
-  "thoughtPattern": "CORE WOUND: must be 'Core Belief'. Otherwise: pattern name OR empty string.",
-  "patternNote": "Brief. CORE WOUND: one sentence max.",
-  "reframe": "State-appropriate. If intervention=TINY_PLAN, include a tiny plan (1–3 steps) inside reframe.",
+  "acknowledgment": "Pick the best one from acknowledgments and paste it here exactly (no labels).",
+  "thoughtPattern": "If clearly present, a pattern name. Otherwise empty string.",
+  "patternNote": "Short explanation (1–2 sentences). CORE WOUND: one sentence max.",
+  "reframe": "State-appropriate. If intervention=TINY_PLAN, include a tiny plan (1–3 steps).",
   "questions": [
-    "Candidate #1 question (if allowed)",
-    "Candidate #2 question (if allowed)",
-    "Candidate #3 optional"
+    "One concrete question (optional)",
+    "Alternative concrete question (optional)"
   ],
   "encouragements": [
-    "Candidate #1 encouragement: natural and specific (NOT poster-y)",
-    "Candidate #2: different angle (still natural)"
+    "Optional supportive line (natural, specific)",
+    "Alternative supportive line (optional)"
   ],
-  "encouragement": ""
+  "encouragement": "Pick the best one from encouragements and paste it here exactly (or empty string)."
 }
 
 RULES:

@@ -205,7 +205,7 @@ export function MoodTracker({ onMoodLogged }: MoodTrackerProps) {
             {/* Notes */}
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">
-                Any thoughts you&apos;d like to share? (optional)
+                Share the one thing that made a difference today!
               </label>
               <textarea
                 value={notes}

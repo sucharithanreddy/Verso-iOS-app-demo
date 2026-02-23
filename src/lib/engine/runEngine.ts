@@ -708,14 +708,14 @@ function sanitizeReframeAllLayers(
 
   if (!r) {
     if (effectiveLayer === 'CORE_WOUND') {
-      if (isAbandonment) return `That fear is real — but it doesn’t mean you’re unlovable.`;
+      if (isAbandonment) return `That fear is real - but it doesn’t mean you’re unlovable.`;
       if (isFailure)
-        return `Not meeting expectations isn’t proof you’re a disappointment — it’s pressure talking.`;
-      return `A painful moment can shake your confidence — but it still doesn’t get to decide your worth.`;
+        return `Not meeting expectations isn’t proof you’re a disappointment - it’s pressure talking.`;
+      return `A painful moment can shake your confidence - but it still doesn’t get to decide your worth.`;
     }
     if (isAbandonment) return `That fear is loud right now, but it isn’t the whole truth about you.`;
-    if (isFailure) return `This feels like a verdict, but it’s still a thought under stress — not a final fact.`;
-    return `The feeling is real — but the conclusion might be harsher than the facts support.`;
+    if (isFailure) return `This feels like a verdict, but it’s still a thought under stress - not a final fact.`;
+    return `The feeling is real - but the conclusion might be harsher than the facts support.`;
   }
 
   const cur = normalizeForCompare(r);
@@ -725,7 +725,7 @@ function sanitizeReframeAllLayers(
   const alreadyUsedWhatIf = prev.some(x => x.startsWith('what if'));
   if (startsWhatIf && alreadyUsedWhatIf) {
     if (isAbandonment || effectiveLayer === 'CORE_WOUND') {
-      return `That fear is real — but it doesn’t mean you’re unlovable or alone forever.`;
+      return `That fear is real - but it doesn’t mean you’re unlovable or alone forever.`;
     }
     return `The feeling is real, but the conclusion may be harsher than the facts.`;
   }
@@ -749,7 +749,7 @@ function sanitizeReframeAllLayers(
       'fixed point on a scale',
     ];
     if (bannedPhrases.some(b => lower.includes(b))) {
-      return `This belief is your brain trying to protect you from getting hurt again — but it isn’t a verdict on you.`;
+      return `This belief is your brain trying to protect you from getting hurt again - but it isn’t a verdict on you.`;
     }
   }
 
@@ -1155,7 +1155,7 @@ Return ONLY valid JSON:
   "acknowledgment": "choose your best",
   "thoughtPattern": "",
   "patternNote": "",
-  "reframe": "Grounding or calming instruction. Present-moment. Sensory if helpful.",
+  "reframe": "Offer a compassionate reframe that challenges the distortion. Provide a new, healthier way to look at the situation.",
   "questions": [],
   "encouragements": [
     "Optional: one natural supportive line (NOT poster-y), OR return []"
@@ -1227,7 +1227,7 @@ Return ONLY valid JSON:
   "acknowledgment": "Pick the best one from acknowledgments and paste it here exactly (no labels).",
   "thoughtPattern": "If clearly present, a pattern name. Otherwise empty string.",
   "patternNote": "Short explanation (1–2 sentences).",
-  "reframe": "State-appropriate. If intervention=TINY_PLAN, include a tiny plan (1–3 steps).",
+  "reframe": "Offer a compassionate reframe that challenges the distortion. Provide a new, healthier way to look at the situation.",
   "questions": [
     "One concrete question (optional)",
     "Alternative concrete question (optional)"
@@ -1337,14 +1337,14 @@ function ensureAllLayers(
       ? [
           `Ouch. That’s heavy to carry.`,
           `That cuts deep.`,
-          `That’s a painful place to be — and you’re naming it.`,
-          snippetIsShort ? `"${snippet}" — yeah. That hurts.` : `I get why this feels so sharp.`,
+          `That’s a painful place to be - and you’re naming it.`,
+          snippetIsShort ? `"${snippet}" - yeah. That hurts.` : `I get why this feels so sharp.`,
         ]
       : [
-          `Okay — got it.`,
+          `Okay - got it.`,
           `Yeah.`,
           `Got it.`,
-          snippetIsShort ? `"${snippet}" — noted.` : `Thanks for putting words to it.`,
+          snippetIsShort ? `"${snippet}" - noted.` : `Thanks for putting words to it.`,
         ];
 
   const fallbackAcknowledgment =
@@ -1395,12 +1395,12 @@ function ensureAllLayers(
   const fallbackReframeOptions =
     effectiveLayer === 'CORE_WOUND'
       ? isAbandonment
-        ? [`That fear is real — but it doesn’t mean you’re unlovable.`]
+        ? [`That fear is real - but it doesn’t mean you’re unlovable.`]
         : isFailure
-          ? [`Not meeting expectations isn’t proof you’re a disappointment — it’s pressure talking.`]
+          ? [`Not meeting expectations isn’t proof you’re a disappointment - it’s pressure talking.`]
           : [
-              `A painful moment can shake your confidence — but it still doesn’t get to decide your worth.`,
-              `It feels true right now — but pressure can make it feel bigger than it is.`,
+              `A painful moment can shake your confidence - but it still doesn’t get to decide your worth.`,
+              `It feels true right now - but pressure can make it feel bigger than it is.`,
             ]
       : isRepeatedEffort
         ? [
@@ -1408,12 +1408,12 @@ function ensureAllLayers(
             `The harsh conclusion isn’t the only explanation here.`,
           ]
         : [
-            `The feeling is real — but the conclusion might be harsher than the facts support.`,
+            `The feeling is real - but the conclusion might be harsher than the facts support.`,
             `It can make emotional sense and still not be the full picture.`,
           ];
 
   const fallbackReframe = groundingMode
-    ? `You don’t have to solve everything right now — just take the next breath.`
+    ? `You don’t have to solve everything right now - just take the next breath.`
     : fallbackReframeOptions[Math.floor(Math.random() * fallbackReframeOptions.length)];
 
   // Default: silence (we only keep question/enc if model provides good candidates)
@@ -1508,7 +1508,7 @@ function ensureAllLayers(
   reframe = sanitizeReframeAllLayers(String(reframe || ''), previousReframes, analysis, effectiveLayer);
 
   if (isDuplicateReframe(reframe, previousReframes) || isNearDuplicateText(reframe, previousReframes)) {
-    reframe = groundingMode ? `Let’s take one small breath here.` : `Let’s pause — this is feeling more final than it actually is.`;
+    reframe = groundingMode ? `Let’s take one small breath here.` : `Let’s pause - this is feeling more final than it actually is.`;
   }
 
   // --- Question handling ---

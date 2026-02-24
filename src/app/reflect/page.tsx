@@ -92,10 +92,7 @@ function normalizeLoadedMessages(raw: Message[]): Message[] {
 
     return {
       ...m,
-      // ✅ show human text in UI
       content: acknowledgment,
-
-      // ✅ hydrate structured fields
       question: ((parsed.question ?? parsed.probingQuestion ?? m.question ?? m.probingQuestion ?? '') as string).trim(),
       thoughtPattern: (parsed.thoughtPattern ?? parsed.distortionType ?? m.thoughtPattern ?? m.distortionType) as any,
       patternNote: (parsed.patternNote ?? parsed.distortionExplanation ?? m.patternNote ?? m.distortionExplanation) as any,
@@ -103,8 +100,6 @@ function normalizeLoadedMessages(raw: Message[]): Message[] {
       encouragement: ((parsed.encouragement ?? m.encouragement ?? '') as string).trim(),
       icebergLayer: (parsed.icebergLayer ?? m.icebergLayer) as any,
       layerInsight: (parsed.layerInsight ?? m.layerInsight) as any,
-
-      // back-compat
       distortionType: (parsed.distortionType ?? m.distortionType) as any,
       distortionExplanation: (parsed.distortionExplanation ?? m.distortionExplanation) as any,
       probingQuestion: (parsed.probingQuestion ?? m.probingQuestion) as any,
@@ -716,6 +711,13 @@ export default function ReflectPage() {
       const res = await fetch(`/api/sessions/${sessionId}`);
       const data = await res.json();
       
+      // 🔍 DEBUG: Check what's coming back from API
+      console.log('=== LOAD SESSION DEBUG ===');
+      console.log('Session ID:', sessionId);
+      console.log('Full response:', data);
+      console.log('Messages count:', data.session?.messages?.length);
+      console.log('First message:', data.session?.messages?.[0]);
+      console.log('=========================');      
       console.log('📦 Loaded session data:', data); // Debug log
       
       if (data.session) {

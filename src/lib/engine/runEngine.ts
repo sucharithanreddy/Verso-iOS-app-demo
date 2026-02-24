@@ -145,7 +145,6 @@ function detectDistortionLikelihood(text: string): number {
 function userSeemsFlooded(text: string): boolean {
   const s = (text || '').toLowerCase().trim();
   const floodIndicators = [
-    "i don't know",
     'dont know',
     "can't recall",
     'cant recall',

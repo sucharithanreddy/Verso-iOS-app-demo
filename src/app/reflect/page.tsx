@@ -422,7 +422,6 @@ export default function ReflectPage() {
                 await saveMessage(activeSessionId, userMessage);
               }
           await saveMessage(activeSessionId, assistantMessage);
-        }
         await fetch(`/api/sessions/${activeSessionId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },

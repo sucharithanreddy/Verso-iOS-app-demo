@@ -23,6 +23,7 @@ interface Stats {
   totalSessions: number;
   completedSessions: number;
   totalReframes: number;
+  totalDistortions: number;
   topDistortions: { type: string; count: number }[];
   topEmotions: { emotion: string; count: number }[];
   averageMood: number;
@@ -49,7 +50,6 @@ export default function ProgressPage() {
     fetchStats();
   }, []);
 
-  // ✅ Fix #1: refresh when the tab/window becomes active again
   useEffect(() => {
     const handleFocus = () => {
       fetchStats();
@@ -63,7 +63,6 @@ export default function ProgressPage() {
     try {
       setLoading(true);
 
-      // ✅ Fix #2: force fresh data (avoid any browser/proxy caching)
       const sessionsRes = await fetch('/api/sessions', { cache: 'no-store' });
       const sessionsData = await sessionsRes.json();
 
@@ -79,11 +78,24 @@ export default function ProgressPage() {
       const completedSessions = sessions.filter((s: { isCompleted: boolean }) => s.isCompleted);
       const totalMessages = sessions.flatMap((s: { messages: any[] }) => s.messages || []);
 
-      // Get distortions
+      // ✅ FIXED: Count reframes (messages with reframe field populated)
+      const totalReframes = totalMessages.filter((m: { reframe: string | null }) => 
+        m.reframe && m.reframe.trim().length > 0
+      ).length;
+
+      // ✅ FIXED: Count distortions using BOTH thoughtPattern (new) AND distortionType (legacy)
+      const totalDistortions = totalMessages.filter((m: { thoughtPattern: string | null; distortionType: string | null }) => 
+        (m.thoughtPattern && m.thoughtPattern.trim().length > 0) ||
+        (m.distortionType && m.distortionType.trim().length > 0)
+      ).length;
+
+      // Get distortions - check both new and legacy fields
       const distortionCounts: Record<string, number> = {};
-      totalMessages.forEach((msg: { distortionType: string | null }) => {
-        if (msg.distortionType) {
-          distortionCounts[msg.distortionType] = (distortionCounts[msg.distortionType] || 0) + 1;
+      totalMessages.forEach((msg: { thoughtPattern: string | null; distortionType: string | null }) => {
+        // Prefer thoughtPattern (new field), fallback to distortionType (legacy)
+        const distortion = msg.thoughtPattern || msg.distortionType;
+        if (distortion && distortion.trim()) {
+          distortionCounts[distortion] = (distortionCounts[distortion] || 0) + 1;
         }
       });
 
@@ -178,7 +190,8 @@ export default function ProgressPage() {
       setStats({
         totalSessions: sessions.length,
         completedSessions: completedSessions.length,
-        totalReframes: totalMessages.filter((m: { distortionType: string | null }) => m.distortionType).length,
+        totalReframes,
+        totalDistortions,
         topDistortions,
         topEmotions,
         averageMood: moodData.stats?.averageMood || 0,

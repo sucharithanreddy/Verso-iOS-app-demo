@@ -12,6 +12,9 @@ import {
   CheckSquare,
   Square,
   X,
+  Moon,
+  Sun,
+  Sparkles,
 } from 'lucide-react';
 import { SignInButton, UserButton, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
@@ -20,6 +23,7 @@ import { IcebergVisualization, IcebergLayer } from '@/components/IcebergVisualiz
 import { DraggableBubble } from '@/components/DraggableBubble';
 import { ThoughtInput } from '@/components/ThoughtInput';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 type UserIntent = 'AUTO' | 'CALM' | 'CLARITY' | 'NEXT_STEP' | 'MEANING' | 'LISTEN';
 
@@ -156,9 +160,30 @@ export default function ReflectPage() {
   const [editContent, setEditContent] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Premium dark mode
+  const [isDark, setIsDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
   const inFlightRef = useRef(false);
   const abortRef = useRef<AbortController | null>(null);
   const requestSeqRef = useRef(0);
+
+  // Dark mode initialization
+  useEffect(() => {
+    setMounted(true);
+    const stored = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const shouldBeDark = stored === 'dark' || (!stored && prefersDark);
+    setIsDark(shouldBeDark);
+    if (shouldBeDark) document.documentElement.classList.add('dark');
+  }, []);
+
+  const toggleDark = () => {
+    const newDark = !isDark;
+    setIsDark(newDark);
+    localStorage.setItem('theme', newDark ? 'dark' : 'light');
+    document.documentElement.classList.toggle('dark', newDark);
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -814,88 +839,93 @@ export default function ReflectPage() {
     URL.revokeObjectURL(url);
   };
 
-  if (!isLoaded) {
+  if (!isLoaded || !mounted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-teal-50 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="relative w-16 h-16">
+          <div className="absolute inset-0 rounded-2xl bg-primary/20 animate-pulse" />
+          <div className="absolute inset-2 rounded-xl bg-primary/40 animate-pulse" style={{ animationDelay: '0.2s' }} />
+          <div className="absolute inset-4 rounded-lg bg-primary animate-pulse" style={{ animationDelay: '0.4s' }} />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-teal-50 relative overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse" />
-        <div
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse"
-          style={{ animationDelay: '2s' }}
-        />
+    <div className="min-h-screen bg-background relative overflow-hidden noise">
+      {/* Ambient background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-[20%] -right-[10%] w-[50%] h-[50%] rounded-full opacity-20 blur-[120px]" style={{ background: 'linear-gradient(135deg, oklch(0.45 0.2 270), oklch(0.55 0.22 300))' }} />
+        <div className="absolute -bottom-[20%] -left-[10%] w-[40%] h-[40%] rounded-full opacity-15 blur-[100px]" style={{ background: 'linear-gradient(135deg, oklch(0.55 0.18 200), oklch(0.45 0.2 270))' }} />
+        <div className="absolute inset-0 dot-pattern opacity-30" />
       </div>
 
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-blue-100">
-        <div className="max-w-6xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Link href="/" className="flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors">
-                <ArrowLeft className="w-4 h-4" />
-              </Link>
-              <div className="w-10 h-10 relative">
-                <img src="/logo.svg" alt="Optimism Engine Logo" className="w-full h-full rounded-xl shadow-lg" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent">
-                  Reflect
-                </h1>
-                <p className="text-xs text-gray-500">Understand your thoughts</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {isSignedIn ? (
-                <>
-                  <Link href="/lab" className="text-sm font-medium text-accent hover:text-accent/80 transition-colors px-3 py-2 hidden sm:block rounded-lg hover:bg-accent/10">The Lab →</Link>
-                  <Link href="/progress">
-                    <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700">
-                      <TrendingUp className="w-4 h-4 mr-1" />
-                      Progress
-                    </Button>
-                  </Link>
-                  {sessions.length > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowHistory(!showHistory)}
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      <History className="w-4 h-4 mr-1" />
-                      History
-                    </Button>
-                  )}
-                  {sessionStarted && (
-                    <Button variant="ghost" size="sm" onClick={handleReset} className="text-gray-500 hover:text-gray-700">
-                      <RotateCcw className="w-4 h-4 mr-1" />
-                      New
-                    </Button>
-                  )}
-                  <UserButton afterSignOutUrl="/" />
-                </>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <SignInButton mode="modal">
-                    <Button variant="ghost" size="sm">
-                      Sign In
-                    </Button>
-                  </SignInButton>
-                  <SignInButton mode="modal">
-                    <Button
-                      size="sm"
-                      className="bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600"
-                    >
-                      Save Progress
-                    </Button>
-                  </SignInButton>
+      {/* Header */}
+      <header className="sticky top-0 z-50">
+        <div className="glass border-b border-border/50">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Link href="/" className="p-2 rounded-xl hover:bg-secondary/80 transition-colors">
+                  <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+                </Link>
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-premium">
+                  <Sparkles className="w-5 h-5 text-primary-foreground" />
                 </div>
-              )}
+                <div>
+                  <h1 className="text-lg font-semibold text-foreground">Reflect</h1>
+                  <p className="text-xs text-muted-foreground">Understand your thoughts</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {/* Dark mode toggle */}
+                <button onClick={toggleDark} className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-all">
+                  <AnimatePresence mode="wait" initial={false}>
+                    {isDark ? (
+                      <motion.div key="sun" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                        <Sun className="w-5 h-5" />
+                      </motion.div>
+                    ) : (
+                      <motion.div key="moon" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                        <Moon className="w-5 h-5" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </button>
+                {isSignedIn ? (
+                  <>
+                    <Link href="/lab" className="text-sm font-medium text-accent hover:text-accent/80 transition-colors px-3 py-2 hidden sm:block rounded-lg hover:bg-accent/10">The Lab →</Link>
+                    <Link href="/progress">
+                      <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                        <TrendingUp className="w-4 h-4 mr-1" />
+                        Progress
+                      </Button>
+                    </Link>
+                    {sessions.length > 0 && (
+                      <Button variant="ghost" size="sm" onClick={() => setShowHistory(!showHistory)} className="text-muted-foreground hover:text-foreground">
+                        <History className="w-4 h-4 mr-1" />
+                        History
+                      </Button>
+                    )}
+                    {sessionStarted && (
+                      <Button variant="ghost" size="sm" onClick={handleReset} className="text-muted-foreground hover:text-foreground">
+                        <RotateCcw className="w-4 h-4 mr-1" />
+                        New
+                      </Button>
+                    )}
+                    <UserButton afterSignOutUrl="/" />
+                  </>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <SignInButton mode="modal">
+                      <Button variant="ghost" size="sm">Sign In</Button>
+                    </SignInButton>
+                    <SignInButton mode="modal">
+                      <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-premium">Save Progress</Button>
+                    </SignInButton>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -908,26 +938,21 @@ export default function ReflectPage() {
             initial={{ x: -300, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -300, opacity: 0 }}
-            className="fixed left-0 top-16 bottom-0 w-80 bg-white/95 backdrop-blur-lg border-r border-blue-100 z-40 overflow-y-auto"
+            className="fixed left-0 top-[73px] bottom-0 w-80 glass border-r border-border/50 z-40 overflow-y-auto"
           >
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-800">Session History</h2>
+            <div className="p-5">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-lg font-semibold text-foreground">Session History</h2>
                 {!selectMode && sessions.length > 0 && (
-                  <button
-                    onClick={() => setSelectMode(true)}
-                    className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                  >
+                  <button onClick={() => setSelectMode(true)} className="text-xs text-primary hover:text-primary/80 flex items-center gap-1">
                     <CheckSquare className="w-3.5 h-3.5" />
                     Select
                   </button>
                 )}
                 {selectMode && (
                   <div className="flex items-center gap-2">
-                    <button onClick={selectAll} className="text-xs text-blue-600 hover:text-blue-700">
-                      All
-                    </button>
-                    <button onClick={clearSelection} className="text-xs text-gray-500 hover:text-gray-700">
+                    <button onClick={selectAll} className="text-xs text-primary hover:text-primary/80">All</button>
+                    <button onClick={clearSelection} className="text-xs text-muted-foreground hover:text-foreground">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
@@ -937,7 +962,7 @@ export default function ReflectPage() {
               {selectMode && selectedIds.size > 0 && (
                 <button
                   onClick={deleteSelected}
-                  className="w-full mb-3 py-2 px-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+                  className="w-full mb-4 py-2.5 px-4 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                   Delete Selected ({selectedIds.size})
@@ -945,42 +970,40 @@ export default function ReflectPage() {
               )}
 
               <div className="space-y-2">
-                {sessions.map((session, index) => (
+                {sessions.map((session) => (
                   <div
                     key={session.id}
                     onClick={() => {
                       console.log('🖱️ Clicked session:', session.id, 'Title:', session.title);
                       if (!selectMode) loadSession(session.id);
                     }}
-                    className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer relative group ${
+                    className={cn(
+                      "w-full text-left p-4 rounded-xl border transition-all cursor-pointer relative group",
                       selectedIds.has(session.id)
-                        ? 'border-blue-500 bg-blue-50'
+                        ? 'border-primary bg-primary/5'
                         : currentSessionId === session.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-                    }`}
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border/50 hover:border-primary/30 hover:bg-secondary/50'
+                    )}
                   >
                     {selectMode ? (
-                      <button
-                        onClick={(e) => toggleSelect(session.id, e)}
-                        className="absolute top-3 right-3 text-blue-600"
-                      >
-                        {selectedIds.has(session.id) ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5 text-gray-300" />}
+                      <button onClick={(e) => toggleSelect(session.id, e)} className="absolute top-3 right-3 text-primary">
+                        {selectedIds.has(session.id) ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5 text-muted-foreground/30" />}
                       </button>
                     ) : (
                       <button
                         onClick={(e) => deleteSession(session.id, e)}
-                        className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                        className="absolute top-2 right-2 p-1.5 text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
                         title="Delete session"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     )}
-                    <p className="text-sm font-medium text-gray-800 truncate pr-8">{session.title || 'Untitled Session'}</p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-sm font-medium text-foreground truncate pr-8">{session.title || 'Untitled Session'}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
                       {new Date(session.createdAt).toLocaleDateString()} • {session.messages.length} messages
                     </p>
-                    {session.coreBelief && <p className="text-xs text-blue-600 mt-1 truncate">Core belief: {session.coreBelief}</p>}
+                    {session.coreBelief && <p className="text-xs text-primary mt-1 truncate">Core belief: {session.coreBelief}</p>}
                   </div>
                 ))}
               </div>
@@ -990,36 +1013,34 @@ export default function ReflectPage() {
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 py-6">
+      <main className="relative z-10 max-w-7xl mx-auto px-6 py-6">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Chat Section */}
           <div className="flex-1 flex flex-col min-h-0">
             {!sessionStarted && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex-1 flex flex-col items-center justify-center py-12">
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex-1 flex flex-col items-center justify-center py-16">
                 <motion.div
                   animate={{ scale: [1, 1.05, 1], rotate: [0, 5, -5, 0] }}
                   transition={{ duration: 4, repeat: Infinity, repeatType: 'loop' }}
                   className="mb-8"
                 >
-                  <div className="w-24 h-24 relative">
-                    <img src="/logo.svg" alt="Optimism Engine" className="w-full h-full rounded-3xl shadow-2xl" />
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-premium">
+                    <Sparkles className="w-10 h-10 text-primary-foreground" />
                   </div>
                 </motion.div>
 
-                <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
-                  <span className="bg-gradient-to-r from-blue-600 via-teal-600 to-sky-500 bg-clip-text text-transparent">
-                    What&apos;s on your mind?
-                  </span>
+                <h2 className="text-display text-center mb-4">
+                  <span className="gradient-text">What&apos;s on your mind?</span>
                 </h2>
 
-                <p className="text-gray-600 text-center max-w-md mb-8 text-lg">
-                  Share a thought that&apos;s been weighing on you. Let&apos;s explore it together - surface, trigger, emotion, and the core belief beneath.
+                <p className="text-muted-foreground text-center max-w-lg mb-8 text-lg">
+                  Share a thought that&apos;s been weighing on you. Let&apos;s explore it together — surface, trigger, emotion, and the core belief beneath.
                 </p>
 
                 {!isSignedIn && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 max-w-md">
-                    <p className="text-sm text-blue-700">
-                      <strong>Sign in</strong> to save your sessions and track your progress over time!
+                  <div className="glass rounded-xl border border-primary/20 p-4 mb-6 max-w-md">
+                    <p className="text-sm text-foreground">
+                      <strong className="text-primary">Sign in</strong> to save your sessions and track your progress over time!
                     </p>
                   </div>
                 )}
@@ -1045,14 +1066,14 @@ export default function ReflectPage() {
 
                 {isLoading && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-3 pl-4">
-                    <div className="w-10 h-10">
-                      <img src="/logo.svg" alt="" className="w-full h-full rounded-full animate-pulse" />
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center animate-pulse shadow-premium">
+                      <Sparkles className="w-5 h-5 text-primary-foreground" />
                     </div>
                     <div className="flex gap-1">
                       {[0, 1, 2].map((i) => (
                         <motion.div
                           key={i}
-                          className="w-2 h-2 rounded-full bg-blue-400"
+                          className="w-2 h-2 rounded-full bg-primary"
                           animate={{ y: [0, -6, 0] }}
                           transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
                         />
@@ -1066,14 +1087,14 @@ export default function ReflectPage() {
             )}
 
             {/* Input Area */}
-            <div className="mt-4 space-y-2">
+            <div className="mt-4 space-y-3">
               <div className="flex items-center justify-end gap-2">
-                <span className="text-xs text-gray-500">Mode</span>
+                <span className="text-xs text-muted-foreground">Mode</span>
                 <select
                   value={userIntent}
                   onChange={(e) => setUserIntent(e.target.value as UserIntent)}
                   disabled={isLoading || isSaving}
-                  className="text-xs border border-gray-200 bg-white/80 rounded-lg px-2 py-1 shadow-sm"
+                  className="text-xs border border-border bg-card rounded-lg px-3 py-1.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
                   <option value="AUTO">AUTO</option>
                   <option value="CALM">CALM</option>
@@ -1097,7 +1118,7 @@ export default function ReflectPage() {
 
             {sessionStarted && messages.length > 0 && (
               <div className="mt-4 flex justify-center">
-                <Button variant="ghost" size="sm" onClick={exportSession} className="text-gray-500 hover:text-gray-700">
+                <Button variant="ghost" size="sm" onClick={exportSession} className="text-muted-foreground hover:text-foreground">
                   <Download className="w-4 h-4 mr-1" />
                   Export Session
                 </Button>
@@ -1109,7 +1130,7 @@ export default function ReflectPage() {
           {sessionStarted && (
             <div className="hidden lg:block w-80 flex-shrink-0">
               <div className="sticky top-24">
-                <div className="bg-white/80 backdrop-blur-lg rounded-2xl border border-blue-100 shadow-lg p-4">
+                <div className="glass rounded-2xl border border-border/50 shadow-premium p-5">
                   <IcebergVisualization currentLayer={currentLayer} discoveredInsights={discoveredInsights} />
                 </div>
               </div>
@@ -1123,13 +1144,12 @@ export default function ReflectPage() {
         </div>
       </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white/80 to-transparent h-16 pointer-events-none" />
-
-      <div className="fixed bottom-2 left-0 right-0 text-center pointer-events-none">
-        <p className="text-xs text-gray-400">
-          Not a replacement for professional help. If in crisis, call 988 (US) or your local helpline.
-        </p>
-      </div>
+      {/* Footer */}
+      <footer className="relative z-10 py-6 px-6 border-t border-border/50 mt-8">
+        <div className="max-w-5xl mx-auto text-center">
+          <p className="text-xs text-muted-foreground">Not a replacement for professional help. If in crisis, call 988 (US) or your local helpline.</p>
+        </div>
+      </footer>
     </div>
   );
 }

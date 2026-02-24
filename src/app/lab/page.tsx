@@ -436,7 +436,7 @@ function DistortionSpotter() {
   const [score, setScore] = useState(0);
 
   const examples = [
-    { thought: "I failed once, so I'm a total failure.", distortion: "All-or-Nothing Thinking", options: ["All-or-Nothing Thinking', 'Overgeneralization', 'Labeling', 'Catastrophizing']" },
+    { thought: "I failed once, so I'm a total failure.", distortion: "All-or-Nothing Thinking", options: ["All-or-Nothing Thinking", "Overgeneralization", "Labeling", "Catastrophizing"] },
     { thought: "Everyone is judging me right now.", distortion: "Mind Reading", options: ["Mind Reading", "Fortune Telling", "Personalization", "Emotional Reasoning"] },
     { thought: "I feel stupid, therefore I am stupid.", distortion: "Emotional Reasoning", options: ["Labeling", "Emotional Reasoning", "Should Statements", "Mental Filter"] },
     { thought: "They didn't text back. They hate me.", distortion: "Mind Reading", options: ["Mind Reading", "Overgeneralization", "Catastrophizing", "All-or-Nothing Thinking"] },

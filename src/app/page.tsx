@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Sparkles, 
   Heart, 
-  HandHeart, 
   ArrowRight, 
   Moon, 
   Sun,
@@ -310,6 +309,9 @@ export default function Home() {
                   </div>
                 </motion.div>
               </Link>
+            </div>
+          </div>
+        </section>
 
         {/* Features Section */}
         <section className="py-20 px-6">

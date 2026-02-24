@@ -473,7 +473,7 @@ function DistortionSpotter() {
           <div>
             <h3 className="font-semibold text-foreground">Distortion Spotter</h3>
             <p className="text-xs text-muted-foreground">Train your pattern recognition</p>
-          </div>
+            </div>
         </div>
         <span className="text-sm font-medium text-primary">Score: {score}</span>
       </div>
@@ -630,12 +630,6 @@ export default function LabPage() {
     document.documentElement.classList.toggle('dark', newDark);
   };
 
-  const quickTools = [
-    { id: 'grounding' as const, icon: Brain, title: 'Grounding', subtitle: '5-4-3-2-1 Technique', color: 'from-blue-500 to-cyan-500' },
-    { id: 'breathwork' as const, icon: Wind, title: 'Breathwork', subtitle: 'Box Breathing', color: 'from-teal-500 to-emerald-500' },
-    { id: 'reality' as const, icon: HelpCircle, title: 'Reality Check', subtitle: 'Is this true?', color: 'from-amber-500 to-orange-500' },
-  ];
-
   if (!mounted) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -706,30 +700,6 @@ export default function LabPage() {
           </div>
 
           <div className="grid grid-cols-3 gap-4">
-            {quickTools.map((tool, i) => (
-              <motion.button
-                key={tool.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                onClick={() => setActiveTool(tool.id)}
-                className="group relative aspect-square rounded-2xl overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br opacity-90 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(135deg, var(--tw-gradient-stops))` }} />
-                <div className={cn('absolute inset-0 bg-gradient-to-br opacity-90 group-hover:opacity-100 transition-opacity', `from-${tool.color.split(' ')[0].replace('from-', '')} to-${tool.color.split(' ')[1].replace('to-', '')}`)} />
-                <div className="absolute inset-0 bg-gradient-to-br opacity-90 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-blue-500 to-cyan-500" />
-                <div className="relative h-full flex flex-col items-center justify-center p-4 text-white">
-                  <tool.icon className="w-10 h-10 mb-3 group-hover:scale-110 transition-transform" />
-                  <span className="font-semibold text-lg">{tool.title}</span>
-                  <span className="text-xs opacity-80">{tool.subtitle}</span>
-                </div>
-                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </motion.button>
-            ))}
-          </div>
-
-          {/* Fixed colored cards */}
-          <div className="grid grid-cols-3 gap-4 mt-4">
             <motion.button
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

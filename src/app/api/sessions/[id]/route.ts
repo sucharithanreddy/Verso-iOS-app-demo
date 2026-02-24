@@ -202,7 +202,7 @@ export async function PUT(
         summary: summary === undefined ? undefined : summary,
         distortions: distortions === undefined ? undefined : distortions,
         isCompleted: isCompleted === undefined ? undefined : isCompleted,
-
+    
         currentLayer: currentLayer === undefined ? undefined : currentLayer,
         coreBelief: coreBelief === undefined ? undefined : coreBelief,
         coreBeliefAlreadyDetected:
@@ -211,10 +211,9 @@ export async function PUT(
         groundingMode: groundingMode === undefined ? undefined : !!groundingMode,
         groundingTurns: groundingTurns === undefined ? undefined : Math.max(0, Number(groundingTurns) || 0),
         lastIntentUsed: lastIntentUsed === undefined ? undefined : lastIntentUsed,
-        originalTrigger: originalTrigger === undefined ? undefined : originalTrigger,
-
-        lastUpdatedAt: new Date(),
-      } as any,
+        // Removed: originalTrigger and lastUpdatedAt - not in schema
+        // updatedAt is auto-managed by Prisma
+      },
     });
 
     return NextResponse.json({ session: updated });

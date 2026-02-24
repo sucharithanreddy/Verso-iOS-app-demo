@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   TrendingUp,
   Calendar,
   Target,
+  Heart,
   Brain,
   Sparkles,
   Award,
@@ -39,139 +40,89 @@ interface MoodEntry {
   createdAt: string;
 }
 
-type Session = {
-  id: string;
-  title?: string | null;
-  summary?: string | null;
-  coreBelief?: string | null;
-  currentLayer?: string | null;
-  isCompleted?: boolean;
-  createdAt?: string;
-  messages?: any[];
-};
-
-function safeLower(s: unknown) {
-  return (typeof s === 'string' ? s : '').toLowerCase();
-}
-
-// Prefer both naming conventions because your app stores fields in multiple places
-function getDistortionFromMessage(msg: any): string {
-  const v =
-    msg?.distortionType ??
-    msg?.thoughtPattern ??
-    msg?.thought_pattern ??
-    msg?.meta?.distortionType ??
-    msg?.meta?.thoughtPattern ??
-    '';
-  return typeof v === 'string' ? v.trim() : '';
-}
-
-function getLayerFromSession(s: Session): string {
-  const layer = (s?.currentLayer || 'surface').toString();
-  // normalize possible variants
-  if (layer === 'core_belief') return 'coreBelief';
-  if (layer === 'corebelief') return 'coreBelief';
-  return layer;
-}
-
 export default function ProgressPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [moodHistory, setMoodHistory] = useState<MoodEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchStats = useCallback(async () => {
-    setLoading(true);
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
+  // ✅ Fix #1: refresh when the tab/window becomes active again
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchStats();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
+
+  const fetchStats = async () => {
     try {
-      // ✅ cache-bust param + no-store prevents stale progress numbers
-      const ts = Date.now();
+      setLoading(true);
 
-      const [sessionsRes, moodRes, gratitudeRes] = await Promise.all([
-        fetch(`/api/sessions?ts=${ts}`, { cache: 'no-store' }),
-        fetch(`/api/mood?days=30&ts=${ts}`, { cache: 'no-store' }),
-        fetch(`/api/gratitude?limit=100&ts=${ts}`, { cache: 'no-store' }),
-      ]);
-
-      if (!sessionsRes.ok) {
-        const t = await sessionsRes.text();
-        throw new Error(`/api/sessions failed: ${sessionsRes.status} ${t}`);
-      }
-      if (!moodRes.ok) {
-        const t = await moodRes.text();
-        throw new Error(`/api/mood failed: ${moodRes.status} ${t}`);
-      }
-      if (!gratitudeRes.ok) {
-        const t = await gratitudeRes.text();
-        throw new Error(`/api/gratitude failed: ${gratitudeRes.status} ${t}`);
-      }
-
+      // ✅ Fix #2: force fresh data (avoid any browser/proxy caching)
+      const sessionsRes = await fetch('/api/sessions', { cache: 'no-store' });
       const sessionsData = await sessionsRes.json();
+
+      const moodRes = await fetch('/api/mood?days=30', { cache: 'no-store' });
       const moodData = await moodRes.json();
+      setMoodHistory(moodData.entries || []);
+
+      const gratitudeRes = await fetch('/api/gratitude?limit=100', { cache: 'no-store' });
       const gratitudeData = await gratitudeRes.json();
 
-      const sessions: Session[] = Array.isArray(sessionsData?.sessions) ? sessionsData.sessions : [];
+      // Calculate stats
+      const sessions = sessionsData.sessions || [];
+      const completedSessions = sessions.filter((s: { isCompleted: boolean }) => s.isCompleted);
+      const totalMessages = sessions.flatMap((s: { messages: any[] }) => s.messages || []);
 
-      // ✅ If your API is paginating/limiting sessions, stats will be wrong.
-      // This log helps you detect it immediately.
-      if (sessions.length > 0 && sessions.length < 50) {
-        console.warn(
-          `[Progress] /api/sessions returned ${sessions.length} sessions. If you expect ~94, your sessions API is probably paginated/limited.`
-        );
-      }
-
-      // Stable ordering
-      const sessionsSorted = [...sessions].sort((a, b) => {
-        const ta = new Date(a.createdAt || 0).getTime();
-        const tb = new Date(b.createdAt || 0).getTime();
-        return tb - ta;
-      });
-
-      const completedSessions = sessionsSorted.filter((s) => !!s.isCompleted);
-
-      // Flatten messages (safe)
-      const totalMessages = sessionsSorted.flatMap((s) => (Array.isArray(s.messages) ? s.messages : []));
-
-      // ----- Distortions -----
+      // Get distortions
       const distortionCounts: Record<string, number> = {};
-      for (const msg of totalMessages) {
-        const d = getDistortionFromMessage(msg);
-        if (d) distortionCounts[d] = (distortionCounts[d] || 0) + 1;
-      }
+      totalMessages.forEach((msg: { distortionType: string | null }) => {
+        if (msg.distortionType) {
+          distortionCounts[msg.distortionType] = (distortionCounts[msg.distortionType] || 0) + 1;
+        }
+      });
 
       const topDistortions = Object.entries(distortionCounts)
         .map(([type, count]) => ({ type, count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 5);
 
-      // ----- Layer progress (by session currentLayer) -----
+      // Get iceberg layer progress
       const layerCounts: Record<string, number> = { surface: 0, trigger: 0, emotion: 0, coreBelief: 0 };
-      for (const s of sessionsSorted) {
-        const layer = getLayerFromSession(s);
-        if (layerCounts[layer] !== undefined) layerCounts[layer]++;
-        else layerCounts.surface++; // fallback
-      }
+      sessions.forEach((s: { currentLayer: string }) => {
+        const layer = s.currentLayer || 'surface';
+        if (layerCounts[layer] !== undefined) {
+          layerCounts[layer]++;
+        }
+      });
 
       const layerOrder = ['surface', 'trigger', 'emotion', 'coreBelief'];
       const layerProgress = layerOrder.map((layer) => ({
         layer,
         count: layerCounts[layer],
-        percentage: sessionsSorted.length > 0 ? Math.round((layerCounts[layer] / sessionsSorted.length) * 100) : 0,
+        percentage: sessions.length > 0 ? Math.round((layerCounts[layer] / sessions.length) * 100) : 0,
       }));
 
-      // Avg depth
+      // Calculate average session depth (0-3 scale)
       const layerDepth: Record<string, number> = { surface: 0, trigger: 1, emotion: 2, coreBelief: 3 };
       const averageSessionDepth =
-        sessionsSorted.length > 0
-          ? sessionsSorted.reduce((sum, s) => sum + (layerDepth[getLayerFromSession(s)] ?? 0), 0) / sessionsSorted.length
+        sessions.length > 0
+          ? sessions.reduce((sum: number, s: { currentLayer: string }) => sum + (layerDepth[s.currentLayer] || 0), 0) /
+            sessions.length
           : 0;
 
-      // Core beliefs
-      const coreBeliefs: string[] = sessionsSorted
-        .map((s) => (typeof s.coreBelief === 'string' ? s.coreBelief.trim() : ''))
-        .filter((b) => b.length > 0)
+      // Get core beliefs discovered
+      const coreBeliefs: string[] = sessions
+        .map((s: { coreBelief: string | null }) => s.coreBelief)
+        .filter((b): b is string => b !== null && b.length > 0)
         .slice(0, 5);
 
-      // ----- Emotions (basic keyword scan, but safer) -----
+      // Get emotions from layer insights (extract emotion words)
       const emotionPatterns = [
         'anxious',
         'sad',
@@ -182,63 +133,57 @@ export default function ProgressPage() {
         'disappointed',
         'inadequate',
         'unsettled',
-        'overwhelmed',
-        'scared',
-        'worried',
       ];
-
       const emotionCounts: Record<string, number> = {};
-      for (const msg of totalMessages) {
-        const text = `${safeLower(msg?.content)} ${safeLower(msg?.layerInsight)}`;
-        for (const e of emotionPatterns) {
-          if (text.includes(e)) emotionCounts[e] = (emotionCounts[e] || 0) + 1;
-        }
-      }
+      totalMessages.forEach((msg: { content: string; layerInsight?: string }) => {
+        const text = ((msg.content || '') + ' ' + (msg.layerInsight || '')).toLowerCase();
+        emotionPatterns.forEach((emotion) => {
+          if (text.includes(emotion)) {
+            emotionCounts[emotion] = (emotionCounts[emotion] || 0) + 1;
+          }
+        });
+      });
 
       const topEmotions = Object.entries(emotionCounts)
         .map(([emotion, count]) => ({ emotion, count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 5);
 
-      // Mood trend
-      const entries: MoodEntry[] = Array.isArray(moodData?.entries) ? moodData.entries : [];
-      setMoodHistory(entries);
-
-      const recentMoods = entries.slice(0, 7);
+      // Calculate mood trend
+      const recentMoods = (moodData.entries || []).slice(0, 7);
       let moodTrend: 'up' | 'down' | 'stable' = 'stable';
       if (recentMoods.length >= 3) {
-        const half = Math.floor(recentMoods.length / 2);
-        const firstHalf = recentMoods.slice(0, half);
-        const secondHalf = recentMoods.slice(half);
-        const firstAvg = firstHalf.reduce((sum, e) => sum + e.mood, 0) / (firstHalf.length || 1);
-        const secondAvg = secondHalf.reduce((sum, e) => sum + e.mood, 0) / (secondHalf.length || 1);
+        const firstHalf = recentMoods.slice(0, Math.floor(recentMoods.length / 2));
+        const secondHalf = recentMoods.slice(Math.floor(recentMoods.length / 2));
+        const firstAvg = firstHalf.reduce((sum: number, e: MoodEntry) => sum + e.mood, 0) / firstHalf.length;
+        const secondAvg = secondHalf.reduce((sum: number, e: MoodEntry) => sum + e.mood, 0) / secondHalf.length;
         if (secondAvg > firstAvg + 0.5) moodTrend = 'up';
         else if (secondAvg < firstAvg - 0.5) moodTrend = 'down';
       }
 
-      // Streak (mood-based)
+      // Calculate streak (simplified)
       const today = new Date();
       let streakDays = 0;
       for (let i = 0; i < 30; i++) {
         const checkDate = new Date(today);
         checkDate.setDate(today.getDate() - i);
-        const hasEntry = entries.some((e) => new Date(e.createdAt).toDateString() === checkDate.toDateString());
+        const hasEntry = (moodData.entries || []).some((e: MoodEntry) => {
+          const entryDate = new Date(e.createdAt);
+          return entryDate.toDateString() === checkDate.toDateString();
+        });
         if (hasEntry) streakDays++;
         else if (i > 0) break;
       }
 
-      const gratitudeCount = Array.isArray(gratitudeData?.entries) ? gratitudeData.entries.length : 0;
-
       setStats({
-        totalSessions: sessionsSorted.length,
+        totalSessions: sessions.length,
         completedSessions: completedSessions.length,
-        // ✅ totalReframes should count assistant outputs that actually had a distortion/thoughtPattern
-        totalReframes: totalMessages.filter((m: any) => !!getDistortionFromMessage(m)).length,
+        totalReframes: totalMessages.filter((m: { distortionType: string | null }) => m.distortionType).length,
         topDistortions,
         topEmotions,
-        averageMood: moodData?.stats?.averageMood ?? 0,
+        averageMood: moodData.stats?.averageMood || 0,
         moodTrend,
-        gratitudeCount,
+        gratitudeCount: gratitudeData.entries?.length || 0,
         streakDays,
         layerProgress,
         coreBeliefs,
@@ -246,20 +191,14 @@ export default function ProgressPage() {
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
-      setStats(null);
-      setMoodHistory([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
-  useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
-
-  // Simple mood chart (SVG)
+  // Simple mood chart (SVG-based)
   const MoodChart = ({ data }: { data: MoodEntry[] }) => {
-    if (!data?.length) return null;
+    if (data.length === 0) return null;
 
     const reversedData = [...data].reverse().slice(-14);
     const maxMood = 10;
@@ -305,6 +244,7 @@ export default function ProgressPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-teal-50">
+      {/* Header */}
       <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-lg border-b border-blue-100">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -321,9 +261,6 @@ export default function ProgressPage() {
             </Link>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={fetchStats}>
-              Refresh
-            </Button>
             <Link href="/">
               <Button variant="ghost" size="sm">
                 <ChevronLeft className="w-4 h-4 mr-1" />
@@ -342,8 +279,13 @@ export default function ProgressPage() {
           </div>
         ) : (
           <div className="space-y-6">
+            {/* Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white/80 backdrop-blur-lg rounded-2xl border border-blue-100 p-4">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white/80 backdrop-blur-lg rounded-2xl border border-blue-100 p-4"
+              >
                 <div className="flex items-center gap-2 text-blue-500 mb-2">
                   <Target className="w-5 h-5" />
                   <span className="text-sm font-medium">Sessions</span>
@@ -351,7 +293,12 @@ export default function ProgressPage() {
                 <p className="text-3xl font-bold text-gray-800">{stats?.totalSessions || 0}</p>
               </motion.div>
 
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white/80 backdrop-blur-lg rounded-2xl border border-blue-100 p-4">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-white/80 backdrop-blur-lg rounded-2xl border border-blue-100 p-4"
+              >
                 <div className="flex items-center gap-2 text-teal-500 mb-2">
                   <Award className="w-5 h-5" />
                   <span className="text-sm font-medium">Completed</span>
@@ -359,7 +306,12 @@ export default function ProgressPage() {
                 <p className="text-3xl font-bold text-gray-800">{stats?.completedSessions || 0}</p>
               </motion.div>
 
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white/80 backdrop-blur-lg rounded-2xl border border-blue-100 p-4">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-white/80 backdrop-blur-lg rounded-2xl border border-blue-100 p-4"
+              >
                 <div className="flex items-center gap-2 text-sky-500 mb-2">
                   <Brain className="w-5 h-5" />
                   <span className="text-sm font-medium">Reframes</span>
@@ -367,7 +319,12 @@ export default function ProgressPage() {
                 <p className="text-3xl font-bold text-gray-800">{stats?.totalReframes || 0}</p>
               </motion.div>
 
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white/80 backdrop-blur-lg rounded-2xl border border-blue-100 p-4">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-white/80 backdrop-blur-lg rounded-2xl border border-blue-100 p-4"
+              >
                 <div className="flex items-center gap-2 text-amber-500 mb-2">
                   <Calendar className="w-5 h-5" />
                   <span className="text-sm font-medium">Streak</span>
@@ -376,8 +333,14 @@ export default function ProgressPage() {
               </motion.div>
             </div>
 
+            {/* Mood Chart */}
             {moodHistory.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="bg-white/80 backdrop-blur-lg rounded-2xl border border-blue-100 p-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="bg-white/80 backdrop-blur-lg rounded-2xl border border-blue-100 p-6"
+              >
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-blue-500" />
@@ -403,6 +366,121 @@ export default function ProgressPage() {
               </motion.div>
             )}
 
+            {/* Top Distortions */}
+            {stats?.topDistortions && stats.topDistortions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="bg-white/80 backdrop-blur-lg rounded-2xl border border-blue-100 p-6"
+              >
+                <div className="flex items-center gap-2 mb-4">
+                  <Brain className="w-5 h-5 text-amber-500" />
+                  <h3 className="text-lg font-semibold text-gray-800">Your Common Patterns</h3>
+                </div>
+                <div className="space-y-3">
+                  {stats.topDistortions.map((distortion, index) => (
+                    <div key={distortion.type} className="flex items-center gap-3">
+                      <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-sm flex items-center justify-center font-medium">
+                        {index + 1}
+                      </span>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm text-gray-700">{distortion.type}</span>
+                          <span className="text-sm text-gray-500">{distortion.count}x</span>
+                        </div>
+                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-blue-500 to-teal-500 rounded-full"
+                            style={{
+                              width: `${(distortion.count / (stats.topDistortions[0]?.count || 1)) * 100}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Iceberg Layer Progress */}
+            {stats?.layerProgress && stats.layerProgress.some((l) => l.count > 0) && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.55 }}
+                className="bg-white/80 backdrop-blur-lg rounded-2xl border border-blue-100 p-6"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-5 h-5 text-teal-500" />
+                    <h3 className="text-lg font-semibold text-gray-800">Your Iceberg Depth</h3>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-500">Avg Depth</p>
+                    <p className="text-lg font-bold text-teal-600">
+                      {((stats?.averageSessionDepth || 0) * 33.3).toFixed(0)}%
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  {stats.layerProgress.map((layer, index) => {
+                    const layerColors = ['bg-sky-400', 'bg-blue-500', 'bg-indigo-500', 'bg-violet-500'];
+                    const layerLabels = ['Surface', 'Trigger', 'Emotion', 'Core Belief'];
+                    return (
+                      <div key={layer.layer} className="flex items-center gap-3">
+                        <div className={`w-3 h-3 rounded-full ${layerColors[index]}`} />
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm text-gray-700">{layerLabels[index]}</span>
+                            <span className="text-sm text-gray-500">
+                              {layer.count} sessions ({layer.percentage}%)
+                            </span>
+                          </div>
+                          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full ${layerColors[index]} rounded-full transition-all`}
+                              style={{ width: `${layer.percentage}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-gray-500 mt-4">
+                  💡 Sessions that reach Core Belief have the deepest therapeutic impact
+                </p>
+              </motion.div>
+            )}
+
+            {/* Core Beliefs Discovered */}
+            {stats?.coreBeliefs && stats.coreBeliefs.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.58 }}
+                className="bg-gradient-to-r from-violet-50 to-indigo-50 rounded-2xl border border-violet-100 p-6"
+              >
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="w-5 h-5 text-violet-500" />
+                  <h3 className="text-lg font-semibold text-gray-800">Core Beliefs You&apos;ve Discovered</h3>
+                </div>
+                <div className="space-y-2">
+                  {stats.coreBeliefs.map((belief, index) => (
+                    <div key={index} className="flex items-start gap-2 bg-white/60 rounded-xl p-3">
+                      <span className="w-5 h-5 rounded-full bg-violet-100 text-violet-600 text-xs flex items-center justify-center font-medium flex-shrink-0 mt-0.5">
+                        {index + 1}
+                      </span>
+                      <p className="text-sm text-gray-700">{belief}</p>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Mood Tracker & Gratitude Journal */}
             <div className="grid md:grid-cols-2 gap-6">
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
                 <MoodTracker onMoodLogged={fetchStats} />

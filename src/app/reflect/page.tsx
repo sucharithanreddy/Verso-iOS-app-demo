@@ -715,13 +715,18 @@ export default function ReflectPage() {
     try {
       const res = await fetch(`/api/sessions/${sessionId}`);
       const data = await res.json();
+      
+      console.log('📦 Loaded session data:', data); // Debug log
+      
       if (data.session) {
         const normalizedMessages = normalizeLoadedMessages(data.session.messages || []);
-
+        
+        console.log('📦 Normalized messages:', normalizedMessages); // Debug log
+  
         setMessages(normalizedMessages);
         setCurrentLayer(data.session.currentLayer as IcebergLayer);
         setCurrentSessionId(sessionId);
-        setSessionStarted(true);
+        setSessionStarted(true);  // ✅ Make sure this is set!
         setShowHistory(false);
 
         if (typeof data.session.coreBeliefAlreadyDetected === 'boolean') {

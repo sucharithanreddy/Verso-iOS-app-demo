@@ -1034,7 +1034,7 @@ export default function ReflectPage() {
                 </h2>
 
                 <p className="text-muted-foreground text-center max-w-lg mb-8 text-lg">
-                  Share a thought that&apos;s been weighing on you. Let&apos;s explore it together — surface, trigger, emotion, and the core belief beneath.
+                  Share a thought that&apos;s been weighing on you. Let&apos;s explore it together - surface, trigger, emotion, and the core belief beneath.
                 </p>
 
                 {!isSignedIn && (

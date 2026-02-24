@@ -96,7 +96,7 @@ export default function Home() {
                     Optimism Engine
                   </h1>
                   <p className="text-xs text-muted-foreground -mt-0.5">
-                    Think clearly. Respond wisely.
+                    Think clearly. Train wisely.
                   </p>
                 </div>
               </Link>
@@ -188,9 +188,9 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="text-display mb-6"
             >
-              <span className="text-foreground">Understand the message.</span>
+              <span className="text-foreground">Understand Your MInd.</span>
               <br />
-              <span className="gradient-text">Before responding to it.</span>
+              <span className="gradient-text">Before It Understands You.</span>
             </motion.h1>
 
             {/* Subheadline */}
@@ -200,8 +200,8 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-xl text-muted-foreground max-w-2xl mx-auto mb-4"
             >
-              Stop second-guessing your replies. Get instant clarity on emotional messages 
-              and respond with confidence.
+              Train your thoughts, catch cognitive distortions, and build mental clarity 
+              with AI-powered self-reflection.
             </motion.p>
 
             {/* Secondary text */}
@@ -211,8 +211,8 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="text-sm text-muted-foreground/80 max-w-lg mx-auto"
             >
-              Whether it's your own thoughts or someone else's words — 
-              understand what's really being said.
+              Whether you're processing a difficult emotion or training your mind - 
+              we'll help you see things clearly.
             </motion.p>
           </div>
         </section>
@@ -226,7 +226,7 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.4 }}
               className="text-center text-sm font-medium text-muted-foreground uppercase tracking-wider mb-8"
             >
-              Who is this message from?
+              Where do you want to start?
             </motion.p>
 
             <div className="grid md:grid-cols-2 gap-6">

@@ -323,10 +323,10 @@ export default function Home() {
               className="text-center mb-12"
             >
               <h2 className="text-3xl font-semibold text-foreground mb-4">
-                One engine. Two perspectives.
+                One engine. Two Directions.
               </h2>
               <p className="text-muted-foreground max-w-lg mx-auto">
-                The same AI analyzes both- but adapts its response to who needs clarity.
+                Analyse your thoughts, know where thery are coming from!
               </p>
             </motion.div>
 

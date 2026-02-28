@@ -406,3 +406,91 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.5;
   letter-spacing: 0.02em;
 }
+
+/* ============================================
+   📱 iOS SAFE AREAS & MOBILE UTILITIES
+   ============================================ */
+
+/* iOS Safe Area Insets */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-left {
+  padding-left: env(safe-area-inset-left);
+}
+
+.safe-right {
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Full safe area container */
+.safe-area {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* Mobile bottom nav spacing - add this to main content */
+.pb-mobile {
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+}
+
+/* Hide on mobile */
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
+
+/* Hide on desktop */
+@media (min-width: 769px) {
+  .hide-on-desktop {
+    display: none !important;
+  }
+}
+
+/* Mobile-optimized touch targets */
+@media (max-width: 768px) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* iOS-style tap highlight */
+@media (max-width: 768px) {
+  .ios-tap {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .ios-tap:active {
+    background-color: oklch(0.5 0.01 260 / 10%);
+  }
+  
+  .dark .ios-tap:active {
+    background-color: oklch(0.7 0.01 260 / 15%);
+  }
+}
+
+/* Smooth scrolling for iOS */
+@supports (-webkit-overflow-scrolling: touch) {
+  .smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+}
+
+/* Prevent zoom on input focus (iOS) */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}

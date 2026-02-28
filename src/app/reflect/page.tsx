@@ -16,6 +16,7 @@ import {
   Moon,
   Sun,
   Sparkles,
+  User,
 } from 'lucide-react';
 import { SignInButton, UserButton, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
@@ -193,9 +194,17 @@ export default function ReflectPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Debug: Log auth state changes
+  useEffect(() => {
+    console.log('🔐 Auth State - isLoaded:', isLoaded, 'isSignedIn:', isSignedIn);
+  }, [isLoaded, isSignedIn]);
+
   useEffect(() => {
     if (isSignedIn) {
+      console.log('✅ User is signed in, loading sessions...');
       loadSessions();
+    } else {
+      console.log('⚠️ User is NOT signed in');
     }
   }, [isSignedIn]);
 
@@ -1160,17 +1169,50 @@ export default function ReflectPage() {
                 </p>
 
                 {!isSignedIn && (
-                  <div className="glass rounded-xl border border-primary/20 p-4 mb-6 max-w-md">
-                    <p className="text-sm text-foreground">
-                      <strong className="text-primary">Sign in</strong> to save your sessions and track your progress over time!
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="glass rounded-2xl border border-primary/30 p-6 mb-6 max-w-md text-center"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                      <User className="w-6 h-6 text-primary" />
+                    </div>
+                    <p className="text-foreground font-medium mb-2">
+                      Sign in to save your progress
                     </p>
-                  </div>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Your sessions won&apos;t be saved unless you sign in. Track your journey and revisit past reflections.
+                    </p>
+                    <SignInButton mode="modal">
+                      <button className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-all shadow-premium">
+                        Sign In to Save Sessions
+                      </button>
+                    </SignInButton>
+                  </motion.div>
                 )}
               </motion.div>
             )}
 
             {sessionStarted && (
               <div className="flex-1 overflow-y-auto pb-4 space-y-4 max-h-[calc(100vh-300px)]">
+                {/* Warning banner for non-signed-in users */}
+                {!isSignedIn && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="sticky top-0 z-10 glass rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 flex items-center justify-between gap-3"
+                  >
+                    <p className="text-xs text-amber-600 dark:text-amber-400">
+                      ⚠️ Sign in to save this session
+                    </p>
+                    <SignInButton mode="modal">
+                      <button className="px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium">
+                        Sign In
+                      </button>
+                    </SignInButton>
+                  </motion.div>
+                )}
+                
                 <AnimatePresence>
                   {messages.map((message) => (
                     <ChatMessage

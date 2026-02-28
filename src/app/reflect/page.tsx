@@ -871,7 +871,17 @@ export default function ReflectPage() {
         isDark={isDark}
         rightAction={
           isSignedIn ? (
-            <UserButton afterSignOutUrl="/" />
+            <div className="flex items-center gap-1">
+              {sessions.length > 0 && (
+                <button
+                  onClick={() => setShowHistory(!showHistory)}
+                  className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/80 active:bg-secondary transition-all"
+                >
+                  <History className="w-5 h-5" />
+                </button>
+              )}
+              <UserButton afterSignOutUrl="/" />
+            </div>
           ) : (
             <SignInButton mode="modal">
               <button className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-xl">
@@ -953,14 +963,14 @@ export default function ReflectPage() {
         </div>
       </header>
 
-      {/* Session History Sidebar */}
+      {/* Session History Sidebar - Desktop */}
       <AnimatePresence>
         {showHistory && isSignedIn && (
           <motion.div
             initial={{ x: -300, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -300, opacity: 0 }}
-            className="fixed left-0 top-[73px] bottom-0 w-80 glass border-r border-border/50 z-40 overflow-y-auto"
+            className="fixed left-0 top-[73px] bottom-0 w-80 glass border-r border-border/50 z-40 overflow-y-auto hide-on-mobile"
           >
             <div className="p-5">
               <div className="flex items-center justify-between mb-5">
@@ -1030,6 +1040,83 @@ export default function ReflectPage() {
                 ))}
               </div>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Session History Panel - Mobile (Full screen overlay) */}
+      <AnimatePresence>
+        {showHistory && isSignedIn && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 md:hidden"
+          >
+            {/* Backdrop */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-background/95 backdrop-blur-xl"
+              onClick={() => setShowHistory(false)}
+            />
+            
+            {/* Content */}
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="absolute inset-x-0 top-0 bottom-0 bg-background pt-safe"
+            >
+              {/* Header */}
+              <div className="sticky top-0 z-10 glass border-b border-border/50">
+                <div className="flex items-center justify-between h-14 px-4">
+                  <h2 className="text-lg font-semibold text-foreground">Session History</h2>
+                  <button
+                    onClick={() => setShowHistory(false)}
+                    className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/80 active:bg-secondary transition-all"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+              
+              {/* Sessions list */}
+              <div className="p-4 space-y-2 overflow-y-auto h-[calc(100%-56px)] pb-mobile">
+                {sessions.map((session) => (
+                  <div
+                    key={session.id}
+                    onClick={() => {
+                      loadSession(session.id);
+                      setShowHistory(false);
+                    }}
+                    className={cn(
+                      "w-full text-left p-4 rounded-xl border transition-all cursor-pointer active:scale-[0.98]",
+                      currentSessionId === session.id
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border/50 hover:border-primary/30 bg-card'
+                    )}
+                  >
+                    <p className="text-sm font-medium text-foreground truncate">{session.title || 'Untitled Session'}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {new Date(session.createdAt).toLocaleDateString()} • {session.messages.length} messages
+                    </p>
+                    {session.coreBelief && (
+                      <p className="text-xs text-primary mt-1 truncate">Core belief: {session.coreBelief}</p>
+                    )}
+                  </div>
+                ))}
+                
+                {sessions.length === 0 && (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">No sessions yet</p>
+                    <p className="text-xs text-muted-foreground/60 mt-1">Start a reflection to see your history</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, 
   Moon, 
@@ -11,17 +11,34 @@ import {
   Flame,
   Sparkles,
   ChevronRight,
-  LogOut
+  History,
+  MessageSquare,
+  Target,
 } from 'lucide-react';
 import { SignInButton, UserButton, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { MobileHeader } from '@/components/MobileHeader';
 import { MobileNav } from '@/components/MobileNav';
+import { cn } from '@/lib/utils';
+
+interface Session {
+  id: string;
+  title: string | null;
+  summary: string | null;
+  coreBelief: string | null;
+  currentLayer: string;
+  isCompleted: boolean;
+  createdAt: string;
+  messages: Array<{ id: string; role: string; content: string }>;
+}
 
 export default function ProfilePage() {
   const { isSignedIn, isLoaded, user } = useUser();
   const [mounted, setMounted] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAllHistory, setShowAllHistory] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -32,12 +49,60 @@ export default function ProfilePage() {
     if (shouldBeDark) document.documentElement.classList.add('dark');
   }, []);
 
+  useEffect(() => {
+    if (isSignedIn) {
+      fetchSessions();
+    }
+  }, [isSignedIn]);
+
+  const fetchSessions = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/sessions', { cache: 'no-store' });
+      const data = await res.json();
+      setSessions(data.sessions || []);
+    } catch (error) {
+      console.error('Error fetching sessions:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const toggleDark = () => {
     const newDark = !isDark;
     setIsDark(newDark);
     localStorage.setItem('theme', newDark ? 'dark' : 'light');
     document.documentElement.classList.toggle('dark', newDark);
   };
+
+  // Calculate real stats
+  const totalSessions = sessions.length;
+  const completedSessions = sessions.filter(s => s.isCompleted).length;
+  const totalMessages = sessions.reduce((sum, s) => sum + (s.messages?.length || 0), 0);
+  
+  // Calculate streak
+  const today = new Date();
+  let streakDays = 0;
+  for (let i = 0; i < 30; i++) {
+    const checkDate = new Date(today);
+    checkDate.setDate(today.getDate() - i);
+    const hasSession = sessions.some(s => {
+      const sessionDate = new Date(s.createdAt);
+      return sessionDate.toDateString() === checkDate.toDateString();
+    });
+    if (hasSession) streakDays++;
+    else if (i > 0) break;
+  }
+
+  const stats = [
+    { label: 'Sessions', value: totalSessions, icon: Calendar },
+    { label: 'Streak', value: `${streakDays}d`, icon: Flame },
+    { label: 'Messages', value: totalMessages, icon: MessageSquare },
+  ];
+
+  // Get recent sessions (last 5)
+  const recentSessions = sessions.slice(0, 5);
+  const displaySessions = showAllHistory ? sessions : recentSessions;
 
   if (!isLoaded || !mounted) {
     return (
@@ -50,13 +115,6 @@ export default function ProfilePage() {
       </div>
     );
   }
-
-  // Stats (mock data - replace with real data from API)
-  const stats = [
-    { label: 'Sessions', value: 12, icon: Calendar },
-    { label: 'Streak', value: '4 days', icon: Flame },
-    { label: 'Patterns', value: 8, icon: Sparkles },
-  ];
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden noise pb-mobile">
@@ -146,10 +204,91 @@ export default function ProfilePage() {
                   className="glass rounded-xl border border-border/50 p-4 text-center"
                 >
                   <stat.icon className="w-5 h-5 text-primary mx-auto mb-2" />
-                  <p className="text-xl font-bold text-foreground">{stat.value}</p>
+                  <p className="text-xl font-bold text-foreground">
+                    {loading ? '...' : stat.value}
+                  </p>
                   <p className="text-xs text-muted-foreground">{stat.label}</p>
                 </div>
               ))}
+            </motion.div>
+
+            {/* Session History Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <History className="w-5 h-5 text-primary" />
+                  <h3 className="text-lg font-semibold text-foreground">Session History</h3>
+                </div>
+                {sessions.length > 5 && (
+                  <button
+                    onClick={() => setShowAllHistory(!showAllHistory)}
+                    className="text-xs text-primary hover:text-primary/80 font-medium"
+                  >
+                    {showAllHistory ? 'Show Less' : `See All (${sessions.length})`}
+                  </button>
+                )}
+              </div>
+
+              {loading ? (
+                <div className="glass rounded-xl border border-border/50 p-6 text-center">
+                  <div className="w-8 h-8 rounded-lg bg-primary/20 animate-pulse mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">Loading sessions...</p>
+                </div>
+              ) : sessions.length === 0 ? (
+                <div className="glass rounded-xl border border-border/50 p-6 text-center">
+                  <Calendar className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No sessions yet</p>
+                  <p className="text-xs text-muted-foreground/60 mt-1">
+                    Start a reflection to see your history
+                  </p>
+                  <Link href="/reflect">
+                    <button className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-medium">
+                      Start Reflecting
+                    </button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {displaySessions.map((session) => (
+                    <Link key={session.id} href={`/reflect?session=${session.id}`}>
+                      <div className="glass rounded-xl border border-border/50 p-4 active:scale-[0.98] transition-transform cursor-pointer">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">
+                              {session.title || 'Untitled Session'}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {new Date(session.createdAt).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })} • {session.messages?.length || 0} messages
+                            </p>
+                            {session.coreBelief && (
+                              <p className="text-xs text-primary mt-1 truncate">
+                                Core belief: {session.coreBelief}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {session.isCompleted && (
+                              <span className="text-xs bg-accent/10 text-accent px-2 py-1 rounded-lg">
+                                Complete
+                              </span>
+                            )}
+                            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </motion.div>
 
             {/* Quick Links */}

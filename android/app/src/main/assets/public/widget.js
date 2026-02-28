@@ -1,11 +1,11 @@
 /**
- * Optimism Engine Widget
+ * Verso Widget
  * Embed this on any website to add AI-powered thought reframing
  * 
  * Usage:
- *   <script src="https://optimism-engine.vercel.app/widget.js"></script>
+ *   <script src="https://verso.app/widget.js"></script>
  *   <script>
- *     OptimismWidget.init({
+ *     VersoWidget.init({
  *       position: 'bottom-right',
  *       primaryColor: '#3b82f6',
  *       greeting: "Hi! I'm here to help."
@@ -16,7 +16,7 @@
 (function() {
   'use strict';
 
-  const WIDGET_URL = 'https://optimism-engine.vercel.app/widget';
+  const WIDGET_URL = 'https://verso.app/widget';
   
   let config = {
     position: 'bottom-right',
@@ -38,9 +38,9 @@
 
   function createStyles() {
     const style = document.createElement('style');
-    style.id = 'optimism-widget-styles';
+    style.id = 'verso-widget-styles';
     style.textContent = `
-      .optimism-widget-bubble {
+      .verso-widget-bubble {
         position: fixed;
         ${config.position.includes('right') ? 'right: 24px;' : 'left: 24px;'}
         bottom: 24px;
@@ -59,18 +59,18 @@
         padding: 0;
       }
       
-      .optimism-widget-bubble:hover {
+      .verso-widget-bubble:hover {
         transform: scale(1.1);
         box-shadow: 0 6px 30px rgba(59, 130, 246, 0.4);
       }
       
-      .optimism-widget-bubble svg {
+      .verso-widget-bubble svg {
         width: 28px;
         height: 28px;
         fill: white;
       }
       
-      .optimism-widget-container {
+      .verso-widget-container {
         position: fixed;
         ${config.position.includes('right') ? 'right: 24px;' : 'left: 24px;'}
         bottom: 100px;
@@ -88,37 +88,37 @@
         border: 1px solid rgba(59, 130, 246, 0.1);
       }
       
-      .optimism-widget-container.open {
+      .verso-widget-container.open {
         opacity: 1;
         transform: scale(1) translateY(0);
         pointer-events: auto;
       }
       
-      .optimism-widget-iframe {
+      .verso-widget-iframe {
         width: 100%;
         height: 100%;
         border: none;
         background: transparent;
       }
       
-      .optimism-widget-pulse {
+      .verso-widget-pulse {
         position: absolute;
         width: 100%;
         height: 100%;
         border-radius: 50%;
         background: ${config.primaryColor};
-        animation: optimism-pulse 2s infinite;
+        animation: verso-pulse 2s infinite;
         opacity: 0.4;
       }
       
-      @keyframes optimism-pulse {
+      @keyframes verso-pulse {
         0% { transform: scale(1); opacity: 0.4; }
         50% { transform: scale(1.3); opacity: 0; }
         100% { transform: scale(1); opacity: 0; }
       }
       
       @media (max-width: 480px) {
-        .optimism-widget-container {
+        .verso-widget-container {
           width: calc(100vw - 48px);
           height: calc(100vh - 150px);
           bottom: 100px;
@@ -131,9 +131,9 @@
 
   function createBubble() {
     bubble = document.createElement('button');
-    bubble.className = 'optimism-widget-bubble';
+    bubble.className = 'verso-widget-bubble';
     bubble.innerHTML = `
-      <div class="optimism-widget-pulse"></div>
+      <div class="verso-widget-pulse"></div>
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
         <path d="M7 9h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/>
@@ -145,10 +145,10 @@
 
   function createContainer() {
     container = document.createElement('div');
-    container.className = 'optimism-widget-container';
+    container.className = 'verso-widget-container';
     
     iframe = document.createElement('iframe');
-    iframe.className = 'optimism-widget-iframe';
+    iframe.className = 'verso-widget-iframe';
     iframe.src = WIDGET_URL;
     iframe.allow = 'microphone; camera';
     container.appendChild(iframe);
@@ -188,14 +188,14 @@
     window.addEventListener('message', handleMessage);
     
     // Expose API
-    window.OptimismWidget = {
+    window.VersoWidget = {
       open: () => { if (!isOpen) toggleWidget(); },
       close: closeWidget,
       toggle: toggleWidget,
       destroy: () => {
         bubble?.remove();
         container?.remove();
-        document.getElementById('optimism-widget-styles')?.remove();
+        document.getElementById('verso-widget-styles')?.remove();
         window.removeEventListener('message', handleMessage);
       }
     };
@@ -214,6 +214,6 @@
   }
 
   // Export init function
-  window.OptimismWidget = { init };
+  window.VersoWidget = { init };
 
 })();

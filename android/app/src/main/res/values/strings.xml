@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Optimism Engine</string>
-    <string name="title_activity_main">Optimism Engine</string>
-    <string name="package_name">com.optimismengine.app</string>
-    <string name="custom_url_scheme">com.optimismengine.app</string>
+    <string name="app_name">Verso</string>
+    <string name="title_activity_main">Verso</string>
+    <string name="package_name">com.verso.app</string>
+    <string name="custom_url_scheme">com.verso.app</string>
 </resources>

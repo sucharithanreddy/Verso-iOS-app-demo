@@ -12,7 +12,7 @@ function RedirectContent() {
                   searchParams.get('token') ||
                   searchParams.get('session_jwt')
     
-    const callbackUrl = `optimismengine://auth-callback${token ? `?token=${encodeURIComponent(token)}` : ''}`
+    const callbackUrl = `verso://auth-callback${token ? `?token=${encodeURIComponent(token)}` : ''}`
     window.location.href = callbackUrl
     
     setTimeout(() => {
@@ -33,7 +33,7 @@ function RedirectContent() {
       color: 'white'
     }}>
       <div style={{ textAlign: 'center' }}>
-        <h1 style={{ fontSize: '24px', marginBottom: '16px' }}>Redirecting to Optimism Engine...</h1>
+        <h1 style={{ fontSize: '24px', marginBottom: '16px' }}>Redirecting to Verso...</h1>
         <p style={{ opacity: 0.8 }}>Please wait while we open the app</p>
         <div id="fallback" style={{ display: 'none', marginTop: '20px' }}>
           <p style={{ fontSize: '14px', opacity: 0.7 }}>

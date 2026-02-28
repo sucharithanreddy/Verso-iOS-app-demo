@@ -168,7 +168,7 @@ export default function ProfilePage() {
           className="text-center pt-4"
         >
           <p className="text-xs text-muted-foreground">
-            Optimism Engine v1.0
+            Verso v1.0
           </p>
           <p className="text-xs text-muted-foreground/60 mt-1">
             AI Safety Layer — Anti-Hallucination Architecture

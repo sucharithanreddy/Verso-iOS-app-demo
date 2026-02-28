@@ -189,7 +189,7 @@ async function callOpenRouter(messages: AIMessage[], config: AIProviderConfig): 
       'Content-Type': 'application/json',
       Authorization: `Bearer ${config.apiKey}`,
       'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-      'X-Title': 'Optimism Engine',
+      'X-Title': 'Verso',
     },
     body: JSON.stringify({
       model,

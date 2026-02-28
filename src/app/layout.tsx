@@ -25,10 +25,10 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "The Optimism Engine - Transform Negative Thoughts",
+  title: "Verso - Transform Negative Thoughts",
   description: "An AI-powered web app that helps you hack negative thoughts and cultivate relentless optimism through CBT reframing and root cause analysis.",
   keywords: ["optimism", "CBT", "cognitive behavioral therapy", "mental health", "positive thinking", "reframing", "mindfulness", "AI therapy", "wellness"],
-  authors: [{ name: "Optimism Engine Team" }],
+  authors: [{ name: "Verso Team" }],
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -42,14 +42,14 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "The Optimism Engine",
+    title: "Verso",
     description: "Transform negative thoughts into relentless optimism with AI-powered reframing",
     type: "website",
     images: ["/logo.png"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "The Optimism Engine",
+    title: "Verso",
     description: "Transform negative thoughts into relentless optimism",
     images: ["/logo.png"],
   },
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Optimism Engine",
+    title: "Verso",
     startupImage: [
       { url: "/logo.png", media: "(device-width: 430px)" },
     ],
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
-  applicationName: "Optimism Engine",
+  applicationName: "Verso",
   generator: "Next.js",
   referrer: "origin-when-cross-origin",
 };
@@ -82,7 +82,7 @@ export default function RootLayout({
           {/* iOS PWA Meta Tags */}
           <meta name="apple-mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-          <meta name="apple-mobile-web-app-title" content="Optimism Engine" />
+          <meta name="apple-mobile-web-app-title" content="Verso" />
           <meta name="mobile-web-app-capable" content="yes" />
           <meta name="format-detection" content="telephone=no" />
           

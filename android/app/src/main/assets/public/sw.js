@@ -1,7 +1,7 @@
-// Optimism Engine Service Worker
+// Verso Service Worker
 // Provides offline capability and caching for PWA
 
-const CACHE_NAME = 'optimism-engine-v1';
+const CACHE_NAME = 'verso-v1';
 const OFFLINE_URL = '/offline';
 
 // Assets to cache on install
@@ -104,7 +104,7 @@ self.addEventListener('push', (event) => {
   const data = event.data.json();
   
   const options = {
-    body: data.body || 'New notification from Optimism Engine',
+    body: data.body || 'New notification from Verso',
     icon: '/logo.png',
     badge: '/logo.png',
     vibrate: [100, 50, 100],
@@ -114,7 +114,7 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'Optimism Engine', options)
+    self.registration.showNotification(data.title || 'Verso', options)
   );
 });
 

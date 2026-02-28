@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.optimismengine.app',
-  appName: 'Optimism Engine',
+  appId: 'com.verso.app',
+  appName: 'Verso',
   webDir: 'public',
   server: {
     // Use the deployed Vercel app to keep API routes and auth working

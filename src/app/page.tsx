@@ -230,7 +230,7 @@ export default function Home() {
 
       {/* Mobile Header */}
       <MobileHeader 
-        title="Optimism Engine"
+        title="Verso"
         subtitle="Think clearly. Train wisely."
         icon="sparkles"
         onToggleDark={toggleDark}
@@ -251,7 +251,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h1 className="text-lg font-semibold tracking-tight text-foreground">
-                    Optimism Engine
+                    Verso
                   </h1>
                   <p className="text-xs text-muted-foreground -mt-0.5">
                     Think clearly. Train wisely.

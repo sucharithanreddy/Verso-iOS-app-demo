@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   RotateCcw,
@@ -122,6 +122,7 @@ function assistantHistoryContent(m: Message) {
 export default function ReflectPage() {
   const { isSignedIn, isLoaded } = useUser();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -879,6 +880,12 @@ export default function ReflectPage() {
         </div>
       </div>
     );
+  }
+
+  // Redirect to home if not signed in
+  if (!isSignedIn) {
+    router.push('/');
+    return null;
   }
 
   return (

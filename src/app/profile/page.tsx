@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, 
@@ -34,6 +35,7 @@ interface Session {
 
 export default function ProfilePage() {
   const { isSignedIn, isLoaded, user } = useUser();
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -114,6 +116,12 @@ export default function ProfilePage() {
         </div>
       </div>
     );
+  }
+
+  // Redirect to home if not signed in
+  if (!isSignedIn) {
+    router.push('/');
+    return null;
   }
 
   return (

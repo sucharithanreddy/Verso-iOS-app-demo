@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   Sparkles, 
   Heart, 
@@ -12,7 +12,8 @@ import {
   Shield,
   Brain,
   ChevronRight,
-  Stars
+  Stars,
+  User,
 } from 'lucide-react';
 import { SignInButton, SignUpButton, UserButton, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
@@ -58,11 +59,157 @@ export default function Home() {
     );
   }
 
+  // ========== UNAUTHENTICATED VIEW ==========
+  if (!isSignedIn) {
+    return (
+      <div className="min-h-screen bg-background relative overflow-hidden">
+        {/* Ambient background effects */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+          <div 
+            className="absolute -top-[20%] -right-[10%] w-[50%] h-[50%] rounded-full opacity-30 blur-[120px]"
+            style={{ background: 'linear-gradient(135deg, oklch(0.45 0.2 270), oklch(0.55 0.22 300))' }}
+          />
+          <div 
+            className="absolute -bottom-[20%] -left-[10%] w-[40%] h-[40%] rounded-full opacity-20 blur-[100px]"
+            style={{ background: 'linear-gradient(135deg, oklch(0.55 0.18 200), oklch(0.45 0.2 270))' }}
+          />
+          <div className="absolute inset-0 dot-pattern opacity-40" />
+        </div>
+
+        {/* Dark mode toggle */}
+        <button
+          onClick={toggleDark}
+          className="fixed top-4 right-4 z-50 w-10 h-10 rounded-xl flex items-center justify-center glass border border-border/50 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+        </button>
+
+        <main className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 py-12">
+          {/* Logo */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="mb-8"
+          >
+            <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl md:rounded-3xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-premium">
+              <Sparkles className="w-10 h-10 md:w-12 md:h-12 text-primary-foreground" />
+            </div>
+          </motion.div>
+
+          {/* Title */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-center mb-6"
+          >
+            <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-2">
+              Optimism Engine
+            </h1>
+            <p className="text-sm md:text-base text-muted-foreground">
+              Think clearly. Train wisely.
+            </p>
+          </motion.div>
+
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/80 border border-border/50 mb-8"
+          >
+            <Stars className="w-4 h-4 text-accent" />
+            <span className="text-sm font-medium text-secondary-foreground">
+              AI-powered emotional intelligence
+            </span>
+          </motion.div>
+
+          {/* Value Prop */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="text-center max-w-md mb-10"
+          >
+            <p className="text-lg md:text-xl text-foreground mb-2">
+              Understand Your Mind.
+            </p>
+            <p className="text-base md:text-lg gradient-text font-medium">
+              Before It Understands You.
+            </p>
+            <p className="text-sm text-muted-foreground mt-4">
+              Train your thoughts, catch cognitive distortions, and build mental clarity with AI-powered self-reflection.
+            </p>
+          </motion.div>
+
+          {/* Auth Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="flex flex-col sm:flex-row gap-3 w-full max-w-sm"
+          >
+            <SignInButton mode="modal">
+              <button className="flex-1 px-6 py-3.5 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-all shadow-premium flex items-center justify-center gap-2">
+                <User className="w-5 h-5" />
+                Sign In
+              </button>
+            </SignInButton>
+            <SignUpButton mode="modal">
+              <button className="flex-1 px-6 py-3.5 glass border border-border/50 text-foreground rounded-xl font-medium hover:bg-secondary/80 transition-all flex items-center justify-center gap-2">
+                Get Started
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </SignUpButton>
+          </motion.div>
+
+          {/* Features preview */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            className="mt-12 grid grid-cols-3 gap-6 max-w-md"
+          >
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-2">
+                <Brain className="w-5 h-5 text-primary" />
+              </div>
+              <p className="text-xs text-muted-foreground">Deep Analysis</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mx-auto mb-2">
+                <Zap className="w-5 h-5 text-accent" />
+              </div>
+              <p className="text-xs text-muted-foreground">Instant Clarity</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mx-auto mb-2">
+                <Shield className="w-5 h-5 text-secondary-foreground" />
+              </div>
+              <p className="text-xs text-muted-foreground">Privacy First</p>
+            </div>
+          </motion.div>
+
+          {/* Footer note */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="mt-auto pt-12 text-xs text-muted-foreground/60 text-center"
+          >
+            Not a replacement for professional help. If in crisis, call 988 (US).
+          </motion.p>
+        </main>
+      </div>
+    );
+  }
+
+  // ========== AUTHENTICATED VIEW ==========
   return (
     <div className="min-h-screen bg-background relative overflow-hidden noise">
       {/* Ambient background effects */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {/* Gradient orbs */}
         <div 
           className="absolute -top-[20%] -right-[10%] w-[50%] h-[50%] rounded-full opacity-30 blur-[120px]"
           style={{ background: 'linear-gradient(135deg, oklch(0.45 0.2 270), oklch(0.55 0.22 300))' }}
@@ -71,12 +218,6 @@ export default function Home() {
           className="absolute -bottom-[20%] -left-[10%] w-[40%] h-[40%] rounded-full opacity-20 blur-[100px]"
           style={{ background: 'linear-gradient(135deg, oklch(0.55 0.18 200), oklch(0.45 0.2 270))' }}
         />
-        <div 
-          className="absolute top-[40%] left-[30%] w-[30%] h-[30%] rounded-full opacity-15 blur-[80px]"
-          style={{ background: 'linear-gradient(135deg, oklch(0.75 0.15 70), oklch(0.65 0.18 50))' }}
-        />
-        
-        {/* Grid pattern */}
         <div className="absolute inset-0 dot-pattern opacity-40" />
       </div>
 
@@ -87,17 +228,7 @@ export default function Home() {
         icon="sparkles"
         onToggleDark={toggleDark}
         isDark={isDark}
-        rightAction={
-          isSignedIn ? (
-            <UserButton afterSignOutUrl="/" />
-          ) : (
-            <SignInButton mode="modal">
-              <button className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-xl">
-                Sign In
-              </button>
-            </SignInButton>
-          )
-        }
+        rightAction={<UserButton afterSignOutUrl="/" />}
       />
 
       {/* Desktop Header */}
@@ -105,13 +236,11 @@ export default function Home() {
         <div className="glass border-b border-border/50">
           <div className="max-w-7xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
-              {/* Logo */}
               <Link href="/" className="flex items-center gap-3 group">
                 <div className="relative">
-                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-premium group-hover:shadow-lg transition-shadow">
+                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-premium">
                     <Sparkles className="w-5 h-5 text-primary-foreground" />
                   </div>
-                  <div className="absolute -inset-1 rounded-xl bg-primary/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div>
                   <h1 className="text-lg font-semibold tracking-tight text-foreground">
@@ -123,62 +252,20 @@ export default function Home() {
                 </div>
               </Link>
 
-              {/* Actions */}
               <div className="flex items-center gap-3">
-                {/* Dark mode toggle */}
                 <button
                   onClick={toggleDark}
                   className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-all"
                 >
-                  <AnimatePresence mode="wait" initial={false}>
-                    {isDark ? (
-                      <motion.div
-                        key="sun"
-                        initial={{ rotate: -90, opacity: 0 }}
-                        animate={{ rotate: 0, opacity: 1 }}
-                        exit={{ rotate: 90, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Sun className="w-5 h-5" />
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="moon"
-                        initial={{ rotate: 90, opacity: 0 }}
-                        animate={{ rotate: 0, opacity: 1 }}
-                        exit={{ rotate: -90, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Moon className="w-5 h-5" />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                 </button>
-
-                {isSignedIn ? (
-                  <div className="flex items-center gap-3">
-                    <Link 
-                      href="/reflect"
-                      className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      Dashboard
-                    </Link>
-                    <UserButton afterSignOutUrl="/" />
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <SignInButton mode="modal">
-                      <button className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                        Sign in
-                      </button>
-                    </SignInButton>
-                    <SignUpButton mode="modal">
-                      <button className="px-5 py-2.5 text-sm font-medium bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all shadow-premium hover:shadow-lg btn-hover-lift">
-                        Get Started
-                      </button>
-                    </SignUpButton>
-                  </div>
-                )}
+                <Link 
+                  href="/reflect"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:block"
+                >
+                  Dashboard
+                </Link>
+                <UserButton afterSignOutUrl="/" />
               </div>
             </div>
           </div>
@@ -190,7 +277,6 @@ export default function Home() {
         {/* Hero Section */}
         <section className="pt-10 md:pt-20 pb-8 md:pb-16 px-4 md:px-6">
           <div className="max-w-5xl mx-auto text-center">
-            {/* Badge */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -203,7 +289,6 @@ export default function Home() {
               </span>
             </motion.div>
 
-            {/* Main headline */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -215,7 +300,6 @@ export default function Home() {
               <span className="gradient-text">Before It Understands You.</span>
             </motion.h1>
 
-            {/* Subheadline */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -224,17 +308,6 @@ export default function Home() {
             >
               Train your thoughts, catch cognitive distortions, and build mental clarity 
               with AI-powered self-reflection.
-            </motion.p>
-
-            {/* Secondary text */}
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="text-xs md:text-sm text-muted-foreground/80 max-w-lg mx-auto px-4"
-            >
-              Whether you&apos;re processing a difficult emotion or training your mind - 
-              we&apos;ll help you see things clearly.
             </motion.p>
           </div>
         </section>
@@ -282,9 +355,6 @@ export default function Home() {
                           <span className="text-[10px] md:text-xs px-2 md:px-3 py-0.5 md:py-1 rounded-full bg-secondary text-secondary-foreground font-medium">
                             Reframing
                           </span>
-                          <span className="text-[10px] md:text-xs px-2 md:px-3 py-0.5 md:py-1 rounded-full bg-secondary text-secondary-foreground font-medium hidden sm:inline-block">
-                            Self-reflection
-                          </span>
                         </div>
                       </div>
                     </div>
@@ -322,9 +392,6 @@ export default function Home() {
                           <span className="text-[10px] md:text-xs px-2 md:px-3 py-0.5 md:py-1 rounded-full bg-secondary text-secondary-foreground font-medium">
                             Practice
                           </span>
-                          <span className="text-[10px] md:text-xs px-2 md:px-3 py-0.5 md:py-1 rounded-full bg-secondary text-secondary-foreground font-medium hidden sm:inline-block">
-                            Goals
-                          </span>
                         </div>
                       </div>
                     </div>
@@ -335,172 +402,40 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Features Section */}
-        <section className="py-12 md:py-20 px-4 md:px-6 hide-on-mobile">
-          <div className="max-w-5xl mx-auto">
+        {/* Quick Access */}
+        <section className="py-6 px-4 md:px-6">
+          <div className="max-w-4xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.7 }}
-              className="text-center mb-12"
+              className="flex flex-col sm:flex-row gap-3 justify-center"
             >
-              <h2 className="text-3xl font-semibold text-foreground mb-4">
-                One engine. Two Directions.
-              </h2>
-              <p className="text-muted-foreground max-w-lg mx-auto">
-                Analyse your thoughts, know where they are coming from!
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.8 }}
-              className="glass rounded-2xl border border-border/50 p-8 shadow-premium"
-            >
-              <div className="grid md:grid-cols-3 gap-8">
-                {/* Feature 1 */}
-                <div className="text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                    <Brain className="w-7 h-7 text-primary" />
+              <Link href="/progress" className="flex-1 max-w-xs mx-auto sm:mx-0">
+                <div className="glass rounded-xl border border-border/50 p-4 flex items-center gap-3 hover:bg-secondary/50 transition-colors cursor-pointer">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Zap className="w-5 h-5 text-primary" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">Deep Analysis</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Detects cognitive patterns, emotional undertones, and unspoken meaning beneath the words.
-                  </p>
-                </div>
-
-                {/* Feature 2 */}
-                <div className="text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-4">
-                    <Zap className="w-7 h-7 text-accent" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-foreground">View Progress</p>
+                    <p className="text-xs text-muted-foreground">Track your journey</p>
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">Instant Clarity</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Get actionable insights in seconds. Know what to do and what to avoid.
-                  </p>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
                 </div>
-
-                {/* Feature 3 */}
-                <div className="text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mx-auto mb-4">
-                    <Shield className="w-7 h-7 text-secondary-foreground" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">Privacy First</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Your messages stay yours. Processed privately, never stored or shared.
-                  </p>
-                </div>
-              </div>
+              </Link>
             </motion.div>
           </div>
         </section>
 
-        {/* Social Proof */}
-        <section className="py-8 md:py-12 px-4 md:px-6 hide-on-mobile">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.9 }}
-            className="max-w-4xl mx-auto"
-          >
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-3">
-                <div className="flex -space-x-3">
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className="w-10 h-10 rounded-full border-2 border-background flex items-center justify-center text-xs font-medium"
-                      style={{
-                        background: `linear-gradient(135deg, 
-                          ${i % 2 === 0 ? 'oklch(0.45 0.2 270)' : 'oklch(0.55 0.18 200)'}, 
-                          ${i % 2 === 0 ? 'oklch(0.55 0.22 300)' : 'oklch(0.45 0.2 270)'})`,
-                        color: 'white',
-                      }}
-                    >
-                      {String.fromCharCode(65 + i)}
-                    </div>
-                  ))}
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <svg key={star} className="w-4 h-4 text-accent fill-current" viewBox="0 0 20 20">
-                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                      </svg>
-                    ))}
-                  </div>
-                  <span className="text-xs">Early testers love it</span>
-                </div>
-              </div>
-              <div className="hidden sm:block w-px h-8 bg-border" />
-              <span className="text-muted-foreground/80">
-                Now available for public beta
-              </span>
-            </div>
-          </motion.div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-10 md:py-16 px-4 md:px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 1 }}
-            className="max-w-2xl mx-auto text-center"
-          >
-            <div className="glass rounded-2xl md:rounded-3xl border border-border/50 p-6 md:p-10 shadow-premium relative overflow-hidden">
-              {/* Background gradient */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
-              
-              <div className="relative">
-                <h2 className="text-xl md:text-2xl font-semibold text-foreground mb-2 md:mb-3">
-                  Ready to think clearly?
-                </h2>
-                <p className="text-sm md:text-base text-muted-foreground mb-4 md:mb-6">
-                  Start your first reflection in under 30 seconds.
-                </p>
-                <Link 
-                  href={isSignedIn ? "/reflect" : "#"}
-                  onClick={(e) => !isSignedIn && e.preventDefault()}
-                >
-                  {isSignedIn ? (
-                    <button className="px-6 md:px-8 py-3 md:py-3.5 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-all shadow-premium hover:shadow-lg btn-hover-lift glow-primary inline-flex items-center gap-2 text-sm md:text-base">
-                      Start Reflecting
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  ) : (
-                    <SignUpButton mode="modal">
-                      <button className="px-6 md:px-8 py-3 md:py-3.5 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-all shadow-premium hover:shadow-lg btn-hover-lift glow-primary inline-flex items-center gap-2 text-sm md:text-base">
-                        Get Started Free
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </SignUpButton>
-                  )}
-                </Link>
-              </div>
-            </div>
-          </motion.div>
-        </section>
-      </main>
-
-      {/* Footer - Desktop only */}
-      <footer className="relative z-10 py-8 px-6 border-t border-border/50 hide-on-mobile">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Footer note */}
+        <div className="py-8 px-6 text-center">
           <p className="text-xs text-muted-foreground">
             Not a replacement for professional help. If in crisis, call 988 (US) or your local helpline.
           </p>
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <span>Privacy-first</span>
-            <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
-            <span>No data stored</span>
-            <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
-            <span>Built with care</span>
-          </div>
         </div>
-      </footer>
+      </main>
 
-      {/* Mobile Bottom Navigation */}
+      {/* Mobile Bottom Navigation - Only for authenticated users */}
       <MobileNav />
     </div>
   );

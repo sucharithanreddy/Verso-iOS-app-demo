@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   TrendingUp,
@@ -14,7 +15,7 @@ import {
   Moon,
   Sun,
 } from 'lucide-react';
-import { UserButton } from '@clerk/nextjs';
+import { UserButton, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { MoodTracker } from '@/components/features/MoodTracker';
 import { GratitudeJournal } from '@/components/features/GratitudeJournal';
@@ -44,6 +45,8 @@ interface MoodEntry {
 }
 
 export default function ProgressPage() {
+  const { isSignedIn, isLoaded } = useUser();
+  const router = useRouter();
   const [stats, setStats] = useState<Stats | null>(null);
   const [moodHistory, setMoodHistory] = useState<MoodEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -237,7 +240,7 @@ export default function ProgressPage() {
     );
   };
 
-  if (!mounted) {
+  if (!isLoaded || !mounted) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="relative w-16 h-16">
@@ -247,6 +250,12 @@ export default function ProgressPage() {
         </div>
       </div>
     );
+  }
+
+  // Redirect to home if not signed in
+  if (!isSignedIn) {
+    router.push('/');
+    return null;
   }
 
   return (

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
@@ -612,7 +613,8 @@ function GoalsSection() {
 // ============================================================================
 
 export default function LabPage() {
-  const { isSignedIn } = useUser();
+  const { isSignedIn, isLoaded } = useUser();
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [activeTool, setActiveTool] = useState<'grounding' | 'breathwork' | 'reality' | null>(null);
@@ -633,7 +635,7 @@ export default function LabPage() {
     document.documentElement.classList.toggle('dark', newDark);
   };
 
-  if (!mounted) {
+  if (!isLoaded || !mounted) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="relative w-16 h-16">
@@ -643,6 +645,12 @@ export default function LabPage() {
         </div>
       </div>
     );
+  }
+
+  // Redirect to home if not signed in
+  if (!isSignedIn) {
+    router.push('/');
+    return null;
   }
 
   return (

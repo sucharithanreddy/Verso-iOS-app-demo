@@ -18,12 +18,12 @@ export function MobileNav() {
   const router = useRouter();
   const { isSignedIn } = useUser();
 
+  // Don't show navigation for unauthenticated users
+  if (!isSignedIn) {
+    return null;
+  }
+
   const handleTabClick = (href: string) => {
-    if (href === '/profile' && !isSignedIn) {
-      // If not signed in, redirect to home with sign-in prompt
-      router.push('/?sign-in=true');
-      return;
-    }
     router.push(href);
   };
 

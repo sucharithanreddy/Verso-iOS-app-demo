@@ -22,7 +22,7 @@ import {
   Check,
   AlertCircle,
 } from 'lucide-react';
-import { UserButton } from '@clerk/nextjs';
+import { UserButton, useUser, SignInButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -612,6 +612,7 @@ function GoalsSection() {
 // ============================================================================
 
 export default function LabPage() {
+  const { isSignedIn } = useUser();
   const [mounted, setMounted] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [activeTool, setActiveTool] = useState<'grounding' | 'breathwork' | 'reality' | null>(null);
@@ -660,7 +661,17 @@ export default function LabPage() {
         icon="lab"
         onToggleDark={toggleDark}
         isDark={isDark}
-        rightAction={<UserButton afterSignOutUrl="/" />}
+        rightAction={
+          isSignedIn ? (
+            <UserButton afterSignOutUrl="/" />
+          ) : (
+            <SignInButton mode="modal">
+              <button className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-xl">
+                Sign In
+              </button>
+            </SignInButton>
+          )
+        }
       />
 
       {/* Desktop Header */}

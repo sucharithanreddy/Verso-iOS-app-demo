@@ -87,7 +87,17 @@ export default function Home() {
         icon="sparkles"
         onToggleDark={toggleDark}
         isDark={isDark}
-        rightAction={isSignedIn ? <UserButton afterSignOutUrl="/" /> : undefined}
+        rightAction={
+          isSignedIn ? (
+            <UserButton afterSignOutUrl="/" />
+          ) : (
+            <SignInButton mode="modal">
+              <button className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-xl">
+                Sign In
+              </button>
+            </SignInButton>
+          )
+        }
       />
 
       {/* Desktop Header */}

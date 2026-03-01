@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { SignInButton, SignUpButton, UserButton, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
+import Image from 'next/image';
 import { MobileHeader } from '@/components/MobileHeader';
 import { MobileNav } from '@/components/MobileNav';
 
@@ -99,8 +100,15 @@ export default function Home() {
             transition={{ duration: 0.5 }}
             className="mb-8"
           >
-            <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl md:rounded-3xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-premium">
-              <Sparkles className="w-10 h-10 md:w-12 md:h-12 text-primary-foreground" />
+            <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl md:rounded-3xl overflow-hidden shadow-premium">
+              <Image
+                src="/logo.png"
+                alt="Verso Logo"
+                width={96}
+                height={96}
+                className="w-full h-full object-cover"
+                priority
+              />
             </div>
           </motion.div>
 
@@ -244,10 +252,14 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
               <Link href="/" className="flex items-center gap-3 group">
-                <div className="relative">
-                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-premium">
-                    <Sparkles className="w-5 h-5 text-primary-foreground" />
-                  </div>
+                <div className="relative w-11 h-11 rounded-xl overflow-hidden shadow-premium">
+                  <Image
+                    src="/logo.png"
+                    alt="Verso Logo"
+                    width={44}
+                    height={44}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div>
                   <h1 className="text-lg font-semibold tracking-tight text-foreground">

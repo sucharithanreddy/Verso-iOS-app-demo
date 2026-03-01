@@ -1,9 +1,10 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Moon, Sun, ArrowLeft, Sparkles } from 'lucide-react';
+import { Moon, Sun, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 interface MobileHeaderProps {
@@ -53,11 +54,14 @@ export function MobileHeader({
               </button>
             ) : (
               <Link href="/" className="flex-shrink-0">
-                <div className={cn(
-                  'w-9 h-9 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-premium',
-                  iconStyles[icon]
-                )}>
-                  <Sparkles className="w-4 h-4 text-white" />
+                <div className="w-9 h-9 rounded-xl overflow-hidden shadow-premium">
+                  <Image
+                    src="/logo.png"
+                    alt="Verso Logo"
+                    width={36}
+                    height={36}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               </Link>
             )}
